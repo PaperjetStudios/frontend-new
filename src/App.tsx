@@ -1,26 +1,23 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Helmet } from "react-helmet";
+import Box from "./components/box";
+import { setup } from "./config/config";
 
-function App() {
+import BaseRoutes from "./routing/router-base";
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Helmet>
+        <html lang="en" className="h-full" />
+        <title>{setup.title}</title>
+        <meta name="description" content={setup.description} />
+        <meta name="theme-color" content="#fff" />
+        <body className="" />
+      </Helmet>
+      <Box className="site-main">
+        <BaseRoutes />
+      </Box>
+    </>
   );
 }
-
-export default App;
