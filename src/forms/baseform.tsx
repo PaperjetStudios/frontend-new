@@ -13,6 +13,7 @@ type BaseFormElementProps = {
   className?: string;
   submitButtonText?: string;
   mainError?: string;
+  mainSuccess?: string;
   loading?: boolean;
   methods?: any;
 };
@@ -23,6 +24,7 @@ const BaseForm: React.FC<BaseFormElementProps> = ({
   submitButtonText,
   children,
   mainError = "",
+  mainSuccess = "",
   loading = false,
   methods,
 }) => {
@@ -31,6 +33,11 @@ const BaseForm: React.FC<BaseFormElementProps> = ({
       {mainError !== "" && (
         <Box className="my-3">
           <Alert severity="error">{mainError}</Alert>
+        </Box>
+      )}
+      {mainSuccess !== "" && (
+        <Box className="my-3">
+          <Alert severity="success">{mainSuccess}</Alert>
         </Box>
       )}
       <form

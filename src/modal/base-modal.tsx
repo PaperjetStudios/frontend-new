@@ -1,4 +1,5 @@
 import { ApolloError, gql, useQuery } from "@apollo/client";
+import classNames from "classnames";
 
 import Box from "../components/box";
 import Loader from "../components/loader";
@@ -65,7 +66,7 @@ const BaseModal: React.FC<ModalProps> = ({
         toggle(false);
       }}
     >
-      <Box className="bg-white rounded-md min-w-modalWidth relative">
+      <Box className="flex flex-col bg-white rounded-md min-w-modalWidth relative max-h-4/5">
         <Button
           sx={{
             position: "absolute",
@@ -102,13 +103,15 @@ const BaseModal: React.FC<ModalProps> = ({
             </Typo>
           )}
         </Box>
-        <Box className="px-5 py-4 rounded-b-md">
-          {modal.Message !== "" && (
-            <Typo className="my-2" t="p">
-              {modal.Message}
-            </Typo>
-          )}
-          {children}
+        <Box className="bg-blue-200 bg-opacity-20 rounded-md max-h-4/5 overflow-x-hidden overflow-y-scroll">
+          <Box className="px-5 py-4 rounded-b-md">
+            {modal.Message !== "" && (
+              <Typo className="my-2" t="p">
+                {modal.Message}
+              </Typo>
+            )}
+            {children}
+          </Box>
         </Box>
       </Box>
     </Modal>
