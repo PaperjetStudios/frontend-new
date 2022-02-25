@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ApolloError, useLazyQuery, gql } from "@apollo/client";
 
 import { userState } from "../../state/user";
 import { userData } from "./types";
@@ -7,26 +8,73 @@ import { axiosInstance } from "../../config/api";
 
 function useUser() {
   const [userData, setUserData] = useState<userData | null>();
-  const [loadingUser, setLoadingUser] = useState(true);
+  // const [loadingUser, setLoadingUser] = useState(true);
   const user = userState.get();
+  const [getUserData, { loading: loadingUser }] = useLazyQuery(
+    gql`
+      query User($id: ID) {
+        usersPermissionsUser(id: $id) {
+          data {
+            attributes {
+              FirstName
+              LastName
+              Phone
+              blocked
+              email
+              username
+              Address {
+                Street_Address_1
+                Street_Address_2
+                Suburb
+                City
+                Country
+                Zip_Code
+              }
+              Wallet_Roundup {
+                Available
+                Open
+              }
+              store {
+                data {
+                  id
+                  attributes {
+                    slug
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+    {
+      onCompleted: (data) => {
+        console.log("User Data Found: ", data);
+      },
+      onError: (err: ApolloError) => {
+        console.log("User Data NOT Found: ", err);
+      },
+    }
+  );
 
   useEffect(() => {
     if (!user) {
-      setLoadingUser(false);
+      // setLoadingUser(false);
       setUserData(null);
     } else {
       if (!userData) {
-        axiosInstance()
-          .get(`api/users/me`)
-          .then((response) => {
-            console.log("getting", response.data);
-            setUserData(response.data);
-            setLoadingUser(false);
-          })
-          .catch((error) => {
-            console.log("An error occurred:", error.response);
-            setLoadingUser(false);
-          });
+        // axiosInstance()
+        //   .get(`api/users/me`)
+        //   .then((response) => {
+        //     console.log("getting", response.data);
+        //     setUserData(response.data);
+        //     setLoadingUser(false);
+        //   })
+        //   .catch((error) => {
+        //     console.log("An error occurred:", error.response);
+        //     setLoadingUser(false);
+        //   });
+        getUserData({ variables: { id: user.id } });
       }
     }
   }, [userData, user]);
@@ -34,7 +82,7 @@ function useUser() {
   const updateUser = async (data: any) => {
     if (user) {
       const { id } = user;
-      setLoadingUser(true);
+      // setLoadingUser(true);
 
       console.log(data);
 
@@ -45,11 +93,11 @@ function useUser() {
         .then((response) => {
           console.log(response);
           setUserData(response.data);
-          setLoadingUser(false);
+          // setLoadingUser(false);
         })
         .catch((error) => {
           console.log("An error occurred:", error.response);
-          setLoadingUser(false);
+          // setLoadingUser(false);
         });
     }
   };
