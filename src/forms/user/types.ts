@@ -1,3 +1,5 @@
+import { StoreData } from "../../components/store/types";
+
 export type userData = {
   FirstName?: string;
   LastName?: string;
@@ -19,7 +21,5 @@ export type userData = {
     Available?: number;
     Open?: number;
   };
-  store?: {
-    id: string;
-  };
+  store?: StoreData;
 };

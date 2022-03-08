@@ -3,6 +3,7 @@ import { ApolloError, useLazyQuery, gql } from "@apollo/client";
 
 import { userState } from "../../state/user";
 import { userData } from "./types";
+import { BASE_STORE } from "../../components/store/queries";
 
 import { axiosInstance } from "../../config/api";
 
@@ -12,6 +13,7 @@ function useUser() {
   const user = userState.get();
   const [getUserData, { loading: loadingUser }] = useLazyQuery(
     gql`
+      ${BASE_STORE}
       query User($id: ID) {
         usersPermissionsUser(id: $id) {
           data {
@@ -38,7 +40,7 @@ function useUser() {
                 data {
                   id
                   attributes {
-                    slug
+                    ...BASE_STORE
                   }
                 }
               }
@@ -50,6 +52,7 @@ function useUser() {
     {
       onCompleted: (data) => {
         console.log("User Data Found: ", data);
+        setUserData(data.usersPermissionsUser.data.attributes);
       },
       onError: (err: ApolloError) => {
         console.log("User Data NOT Found: ", err);

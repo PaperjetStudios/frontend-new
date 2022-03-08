@@ -1,13 +1,11 @@
-import classNames from "classnames";
-import * as yup from "yup";
-import Box from "../../components/box";
 import { useEffect } from "react";
-
+import * as yup from "yup";
+import classNames from "classnames";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { Button } from "@mui/material";
+import Box from "../../components/box";
 import PJSTextInput from "../inputs/textinput";
 import Loader from "../../components/loader";
-
-import { useFieldArray, useFormContext } from "react-hook-form";
-
 import { Icons } from "../../components/icons";
 import Typo from "../../components/typo";
 import { StoreData } from "../../components/store/types";
@@ -18,19 +16,22 @@ type Props = {
 };
 
 const SocialBlock: React.FC<Props> = ({ className }) => {
-  const { control, watch } = useFormContext<StoreData>();
+  const { formState, control, watch } = useFormContext<StoreData>();
 
-  const { fields, append } = useFieldArray<StoreData, "Contact_Details.Social">(
-    {
-      control,
-      name: "Contact_Details.Social",
-    }
-  );
+  const { fields, append, remove } = useFieldArray<
+    StoreData,
+    "Contact_Details.Social"
+  >({
+    control,
+    name: "Contact_Details.Social",
+  });
 
   const watchFieldArray = watch("Contact_Details.Social");
   const watchedFields =
     fields.length > 0
       ? fields.map((field, index) => {
+          // Delete the field "__typename" to avaoid graphQL Errors
+          delete watchFieldArray[index]["__typename"];
           return {
             ...field,
             ...watchFieldArray[index],
@@ -38,28 +39,56 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
         })
       : [];
 
+  console.log(`\n\n Watched Fields: \n`, watchFieldArray);
+
   return (
     <Box className="md:grid md:grid-cols-2 gap-5 mb-10">
       {watchedFields.length > 0 &&
         watchedFields.map((obj, ind) => {
           return (
             <Box
-              className="px-8 pt-5 pb-2 border-grey border rounded-sm"
+              className="relative px-8 pt-5 pb-2 border-grey border rounded-sm"
               key={obj.id}
             >
+              <Button
+                sx={{
+                  position: "absolute",
+                  right: -10,
+                  top: -10,
+                  background: "#000",
+                  color: "#fff",
+                  borderRadius: "100%",
+                  width: "40px !important",
+                  height: "40px !important",
+                  minWidth: "0",
+                  fontSize: 20,
+                  "&:hover": {
+                    background: "#ccc",
+                  },
+                }}
+                onClick={() => {
+                  remove(ind);
+                }}
+              >
+                {Icons.close}
+              </Button>
               <Typo className="pb-5" t="h5">
                 Social Link {ind + 1}
               </Typo>
               <PJSTextInput
                 name={`Contact_Details.Social.${ind}.Url` as const}
                 label="Url"
-                error="Please insert a Url"
+                error={
+                  formState?.errors?.Contact_Details?.Social[ind]?.Url?.message
+                }
                 placeholder="Url"
               />
               <PJSTextInput
                 name={`Contact_Details.Social.${ind}.Type` as const}
                 label="Type"
-                error="Please choose a type"
+                error={
+                  formState?.errors?.Contact_Details?.Social[ind]?.Type?.message
+                }
                 placeholder="Social Platform"
               />
             </Box>
@@ -75,7 +104,7 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
           }
           vcenter
           hcenter
-          className="bg-grey w-24 h-24 rounded-full text-white text-4xl"
+          className="bg-grey w-24 h-24 rounded-full text-white text-4xl cursor-pointer"
         >
           {Icons.plus}
         </Box>

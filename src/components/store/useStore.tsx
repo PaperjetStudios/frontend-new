@@ -1,9 +1,14 @@
-import { ApolloError, useLazyQuery } from "@apollo/client";
+import { ApolloError, useLazyQuery, useMutation } from "@apollo/client";
 import { useState, useEffect } from "react";
 
 import useUser from "../../forms/user/useUser";
 
-import { GET_STORE_BY_ID } from "./queries";
+import {
+  GET_STORE_BY_ID,
+  GET_STORE_BY_USER_ID,
+  CREATE_STORE,
+  UPDATE_STORE,
+} from "./queries";
 import { StoreData } from "./types";
 
 function useStore() {
@@ -11,48 +16,79 @@ function useStore() {
   const [loadingStore, setLoadingStore] = useState(true);
   const { id, userData, loadingUser } = useUser();
 
-  const [getStore, { loading, error, data }] = useLazyQuery(GET_STORE_BY_ID, {
-    onCompleted: (data) => {
-      setLoadingStore(false);
-      console.log("data", data);
-      setStoreData(data.store.data.attributes);
-    },
-    onError: (error: ApolloError) => {
-      console.log(error);
-    },
-  });
+  const [getStore, { loading, error, data: getStoreData }] = useLazyQuery(
+    GET_STORE_BY_USER_ID,
+    {
+      onCompleted: (data) => {
+        setLoadingStore(false);
+        console.log("GetStore data", data);
+        setStoreData(data.findMyStore.data.attributes);
+      },
+      onError: (error: ApolloError) => {
+        console.log(error);
+        setStoreData(null);
+        setLoadingStore(false);
+      },
+    }
+  );
 
   useEffect(() => {
     if (!id) {
       // the user is not logged in
       setLoadingStore(false);
       setStoreData(null);
-    } else {
-      if (!storeData && userData) {
-        // user has a store assigned
+    }
+  }, [userData, storeData, id]);
 
-        if (userData.store.id) {
-          getStore({
-            variables: {
-              id: userData.store.id,
-            },
-          });
-        }
+  const [createStore, { loading: createStoreLoading }] = useMutation(
+    CREATE_STORE,
+    {
+      onCompleted: (data) => {
+        setLoadingStore(false);
+        console.log("Create Store Response Data", data);
+        setStoreData(data.createStore.data.attributes);
+      },
+      onError: (err: ApolloError) => {
+        console.log(err);
+        setLoadingStore(false);
+      },
+    }
+  );
+
+  const [updateStore, { loading: updateStoreLoading }] = useMutation(
+    UPDATE_STORE,
+    {
+      onCompleted: (data) => {
+        setLoadingStore(false);
+        console.log("Update Store Response Data", data);
+        setStoreData(data.updateStore.data.attributes);
+      },
+      onError: (err: ApolloError) => {
+        console.log("Update Store Error: ", err);
+        setLoadingStore(false);
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (loading || createStoreLoading || updateStoreLoading) {
+      setLoadingStore(true);
+    } else {
+      console.log("Should stop loading: ", !storeData);
+      if (!storeData) {
+        setStoreData(getStoreData?.findMyStore?.data?.attributes);
+        setLoadingStore(false);
       } else {
         setLoadingStore(false);
-        setStoreData(null);
-        // no store found
       }
     }
-  }, [userData, storeData, getStore, id]);
-
-  const updateStore = async (data: any) => {
-    console.log(data);
-  };
+  }, [loading, createStoreLoading, updateStoreLoading]);
 
   return {
     loadingStore: loadingStore,
     storeData: storeData,
+    getStore: getStore,
+    createStore: createStore,
     updateStore: updateStore,
   };
 }
