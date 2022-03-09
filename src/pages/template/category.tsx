@@ -1,12 +1,12 @@
-import { useParams } from "react-router-dom";
-import Box from "../../components/box";
+import { useParams } from 'react-router-dom';
+import Box from '../../components/box';
 
 type Props = {};
 
 const Category: React.FC<Props> = ({ children }) => {
-  const { cat } = useParams();
+	const { cat } = useParams();
 
-  return <Box>{cat}</Box>;
+	return <Box>{cat}</Box>;
 };
 
 export default Category;

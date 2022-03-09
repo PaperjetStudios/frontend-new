@@ -7,15 +7,15 @@ body,
 #root,
 .site-main,
 .base-layout {
-  height: 100%;
+	height: 100%;
 }
 
 .base-layout {
-  @apply grid;
-  grid-template-rows: auto 1fr auto;
+	@apply grid;
+	grid-template-rows: auto 1fr auto;
 }
 
 .darkener:before {
-  content: "";
-  @apply absolute inset-0 bg-darken-slight;
+	content: '';
+	@apply absolute inset-0 bg-darken-slight;
 }
