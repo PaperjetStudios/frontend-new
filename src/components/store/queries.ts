@@ -26,6 +26,7 @@ export const BASE_STORE = gql`
       data {
         attributes {
           url
+          name
         }
       }
     }
@@ -33,6 +34,7 @@ export const BASE_STORE = gql`
       data {
         attributes {
           url
+          name
         }
       }
     }
@@ -132,6 +134,8 @@ export const UPDATE_STORE = gql`
     $Country: String
     $Social: [ComponentMenuSocialInput]
     $slug: String
+    $Featured_Image: ID
+    $Gallery: [ID]
   ) {
     updateStore(
       id: $userID
@@ -153,6 +157,8 @@ export const UPDATE_STORE = gql`
           }
           Social: $Social
         }
+        Featured_Image: $Featured_Image
+        Gallery: $Gallery
       }
     ) {
       data {
@@ -160,6 +166,16 @@ export const UPDATE_STORE = gql`
         attributes {
           ...BASE_STORE
         }
+      }
+    }
+  }
+`;
+
+export const UPLOAD_MULTIPLE_FILES = gql`
+  mutation ($files: [Upload]!) {
+    multipleUpload(files: $files) {
+      data {
+        id
       }
     }
   }

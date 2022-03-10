@@ -8,6 +8,7 @@ import {
   GET_STORE_BY_USER_ID,
   CREATE_STORE,
   UPDATE_STORE,
+  UPLOAD_MULTIPLE_FILES,
 } from "./queries";
 import { StoreData } from "./types";
 
@@ -70,6 +71,17 @@ function useStore() {
     }
   );
 
+  // Define uploadFiles mutation
+  const [uploadFiles, { loading: imageUploading }] = useMutation(
+    UPLOAD_MULTIPLE_FILES,
+    {
+      onCompleted: (data) => {},
+      onError: (e) => {
+        console.log("error", JSON.stringify(e));
+      },
+    }
+  );
+
   useEffect(() => {
     if (loading || createStoreLoading || updateStoreLoading) {
       setLoadingStore(true);
@@ -90,6 +102,7 @@ function useStore() {
     getStore: getStore,
     createStore: createStore,
     updateStore: updateStore,
+    uploadFiles: uploadFiles,
   };
 }
 

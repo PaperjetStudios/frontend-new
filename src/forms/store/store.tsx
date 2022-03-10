@@ -16,6 +16,11 @@ import { StoreData } from "../../components/store/types";
 
 import StoreAddressBlock from "./address";
 import SocialBlock from "./social";
+import ImagesWidget from "./imagesWidget";
+
+import { compressImage } from "../../util/files";
+import Typo from "../../components/typo";
+import { currentApi } from "../../config/config";
 
 type Props = {
   className?: string;
@@ -44,13 +49,21 @@ const schema = yup
         })
       ),
     }),
+    Featured_Image: yup.array(),
+    Gallery: yup.array(),
     slug: yup.string(),
   })
   .required();
 
 const StoreForm: React.FC<Props> = ({ children, className, style }) => {
-  const { loadingStore, storeData, getStore, createStore, updateStore } =
-    useStore();
+  const {
+    loadingStore,
+    storeData,
+    getStore,
+    createStore,
+    updateStore,
+    uploadFiles,
+  } = useStore();
   const { id } = useUser();
 
   const methods = useForm<StoreData>({
@@ -59,7 +72,6 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
       Description: storeData?.Description ? storeData?.Description : "",
       slug: storeData?.slug ? storeData?.slug : "",
       Rating: storeData?.Rating ? storeData?.Rating : null,
-      Gallery: storeData?.Gallery,
       Contact_Details: {
         Address: {
           Street_Address_1: storeData?.Contact_Details?.Address.Street_Address_1
@@ -89,6 +101,10 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
             ? storeData?.Contact_Details?.Social
             : [{ Url: "", Type: "" }],
       },
+      Featured_Image: storeData?.Featured_Image
+        ? storeData?.Featured_Image
+        : [],
+      Gallery: storeData?.Gallery ? storeData?.Gallery : [],
     },
     resolver: yupResolver(schema),
   });
@@ -96,13 +112,54 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
   console.log("Form Errors: ", methods.formState?.errors);
   console.log("Store Data: ", storeData);
 
-  useEffect(() => {
-    if (storeData) {
-      methods.reset(storeData);
-      console.log(storeData);
+  const setupLoadedDataImages = async (storeData: any) => {
+    console.log("Store Data: ", storeData);
+    const images: any[] = storeData?.Gallery?.data;
+    const loadedImages: any[] = [];
+    if (images?.length > 0) {
+      for (let j = 0; j < images.length; j++) {
+        if (images[j]) {
+          // Create a file from the image to use it normally
+          let response = await fetch(
+            `${currentApi.url}${images[j]?.attributes?.url}`
+          );
+          let blobData = await response.blob();
+          const fileName: string = images[j]?.attributes?.name;
+          const file = new File([blobData], images[j]?.attributes?.name, {
+            type: `image/${fileName.split(".")[1]}`,
+          });
+
+          loadedImages.push({ file: file });
+        }
+      }
     }
-    return null;
-  }, [storeData, methods]);
+
+    let file: [{ file: File }] | null = null;
+    if (storeData?.Featured_Image?.data) {
+      let response = await fetch(
+        `${currentApi.url}${storeData?.Featured_Image?.data?.attributes?.url}`
+      );
+      let blobData = await response.blob();
+      const fileName: string =
+        storeData?.Featured_Image?.data?.attributes?.name;
+      file = [
+        {
+          file: new File(
+            [blobData],
+            storeData?.Featured_Image?.data?.attributes?.name,
+            {
+              type: `image/${fileName.split(".")[1]}`,
+            }
+          ),
+        },
+      ];
+    }
+
+    return {
+      featuredImage: file,
+      gallery: loadedImages as FileList[],
+    };
+  };
 
   useEffect(() => {
     if (id) {
@@ -115,34 +172,112 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         });
       }
     }
+
+    if (storeData) {
+      const setupImages = async () => {
+        const images = await setupLoadedDataImages(storeData).then(
+          (data) => data
+        );
+
+        console.log("New Store Data: ", {
+          ...storeData,
+          Featured_Image: images.featuredImage ? images.featuredImage : [],
+          Gallery: images.gallery ? images.gallery : [],
+        });
+
+        methods.reset({
+          ...storeData,
+          Featured_Image: images.featuredImage ? images.featuredImage : [],
+          Gallery: images.gallery ? images.gallery : [],
+        });
+      };
+      setupImages();
+    }
   }, [storeData]);
 
   if (loadingStore) {
     return <Loader />;
   }
 
-  const submit: SubmitHandler<StoreData> = (data) => {
+  // Define strapiUpload function
+  const uploadFilesToStrapi = async (imagedata: any) => {
+    let files: any = null;
+    if (imagedata?.length > 0) {
+      const compressedImages = [];
+
+      // Compress images
+      for (const item of imagedata) {
+        console.log("Item: ", item);
+        console.log("Type of Item File: ", item.file instanceof File);
+        //@ts-ignore
+        compressedImages.push(await compressImage(item.file as File));
+      }
+
+      files = await uploadFiles({
+        variables: {
+          files: compressedImages,
+        },
+      });
+    }
+
+    const uploadedImageIds =
+      files !== null
+        ? files?.data?.multipleUpload.map((img: any) => {
+            console.log(img);
+            return img.data.id;
+          })
+        : [];
+
+    return uploadedImageIds;
+  };
+
+  const submit: SubmitHandler<StoreData> = async (data) => {
     if (storeData) {
       console.log("(Update) submit data: ", data);
+      // Upload images to Strapi
+      const featuredImage = await uploadFilesToStrapi(data.Featured_Image);
+      const gallery = await uploadFilesToStrapi(data.Gallery);
+
+      const variables = {
+        ...data.Contact_Details.Address,
+        ...data.Gallery,
+        Social: [...data.Contact_Details.Social],
+        Email: data.Contact_Details.Email,
+        Title: data.Title,
+        Description: data.Description,
+        Rating: data.Rating,
+        slug: data.slug,
+        userID: id,
+        Featured_Image: featuredImage[0],
+        Gallery: gallery,
+      };
+
       try {
         updateStore({
-          variables: {
-            ...data.Contact_Details.Address,
-            ...data.Gallery,
-            Social: [...data.Contact_Details.Social],
-            Email: data.Contact_Details.Email,
-            Title: data.Title,
-            Description: data.Description,
-            Rating: data.Rating,
-            slug: data.slug,
-            userID: id,
-          },
+          variables: variables,
         });
       } catch (e) {
         console.log("OnSubmit Update Store Error: ", e);
       }
     } else {
       console.log("(Create) submit data: ", data);
+      // Upload images to Strapi
+      const featuredImage = await uploadFilesToStrapi(data.Featured_Image);
+      const gallery = await uploadFilesToStrapi(data.Gallery);
+
+      const variables = {
+        ...data.Contact_Details.Address,
+        ...data.Gallery,
+        Social: [...data.Contact_Details.Social],
+        Email: data.Contact_Details.Email,
+        Title: data.Title,
+        Description: data.Description,
+        Rating: data.Rating,
+        slug: data.slug,
+        userID: id,
+        Featured_Image: featuredImage[0],
+        Gallery: gallery,
+      };
       try {
         createStore({
           variables: {
@@ -199,6 +334,20 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
 
           <StoreAddressBlock />
           <SocialBlock />
+
+          <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm w-min">
+            <Typo className="pb-5 text-left" t="h5">
+              Store Logo
+            </Typo>
+            <ImagesWidget name={"Featured_Image"} limit={1} />
+          </Box>
+
+          <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm">
+            <Typo className="pb-5 mt-5 text-left" t="h5">
+              Store Banner Images
+            </Typo>
+            <ImagesWidget name={"Gallery"} />
+          </Box>
 
           <Button
             type="submit"
