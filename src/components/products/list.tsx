@@ -1,14 +1,11 @@
 import * as React from 'react';
 
-import { Grid, Pagination, Container } from '@mui/material';
+import { Grid, Pagination } from '@mui/material';
 import { ApolloError, useQuery } from '@apollo/client';
 
 import Loader from '../loader';
 import { paginated_products } from './queries';
 import ProductCard from './card';
-import Box from '../box';
-
-import LayoutContainer from '../layout-container';
 
 type Props = {
 	pageSize: number;
@@ -52,14 +49,18 @@ const ProductCardList: React.FC<Props> = ({
 	}
 
 	return (
-		<LayoutContainer>
-			{/* <Container maxWidth='xl' sx={{ p: 0 }}> */}
+		<>
 			<Grid
 				container
-				spacing={3}
+				spacing={{
+					xs: 2,
+					md: 3,
+					xl: 6,
+				}}
 				justifyContent='space-between'
 				sx={{
-					my: 3,
+					pt: 7,
+					pb: 3,
 				}}>
 				{data.products.data.map((obj: any, ind: number) => {
 					return (
@@ -74,9 +75,15 @@ const ProductCardList: React.FC<Props> = ({
 				size='small'
 				page={currentPage}
 				onChange={handleChange}
+				sx={{
+					display: 'flex',
+					justifyContent: {
+						xs: 'center',
+						md: 'flex-end',
+					},
+				}}
 			/>
-			{/* </Container> */}
-		</LayoutContainer>
+		</>
 	);
 };
 

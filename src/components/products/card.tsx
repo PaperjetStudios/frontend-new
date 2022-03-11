@@ -38,7 +38,7 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 	return (
 		<Card
 			sx={{
-				maxWidth: 300,
+				// maxWidth: 300,
 				borderRadius: 0,
 				boxShadow: 'none',
 			}}>
