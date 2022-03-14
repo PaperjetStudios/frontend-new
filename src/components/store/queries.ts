@@ -172,8 +172,8 @@ export const UPDATE_STORE = gql`
 `;
 
 export const UPLOAD_MULTIPLE_FILES = gql`
-  mutation ($files: [Upload]!) {
-    multipleUpload(files: $files) {
+  mutation ($files: [Upload]!, $field: [String]!) {
+    multipleUpload(files: $files, field: $field) {
       data {
         id
       }

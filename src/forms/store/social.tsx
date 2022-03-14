@@ -1,13 +1,18 @@
 import { useEffect } from "react";
-import * as yup from "yup";
 import classNames from "classnames";
+// Import Form Libraries
+import * as yup from "yup";
 import { useFieldArray, useFormContext } from "react-hook-form";
+// Import MaterialUI Components
 import { Button } from "@mui/material";
+// Import Custom React Components
 import Box from "../../components/box";
 import PJSTextInput from "../inputs/textinput";
+import SelectInput from "../inputs/selectinput";
 import Loader from "../../components/loader";
 import { Icons } from "../../components/icons";
 import Typo from "../../components/typo";
+// Import Types
 import { StoreData } from "../../components/store/types";
 
 type Props = {
@@ -45,6 +50,7 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
     <Box className="md:grid md:grid-cols-2 gap-5 mb-10">
       {watchedFields.length > 0 &&
         watchedFields.map((obj, ind) => {
+          console.log("Watched field: ", obj);
           return (
             <Box
               className="relative px-8 pt-5 pb-2 border-grey border rounded-sm"
@@ -83,13 +89,27 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
                 }
                 placeholder="Url"
               />
-              <PJSTextInput
+              {/* <PJSTextInput
                 name={`Contact_Details.Social.${ind}.Type` as const}
                 label="Type"
                 error={
                   formState?.errors?.Contact_Details?.Social[ind]?.Type?.message
                 }
                 placeholder="Social Platform"
+              /> */}
+
+              <SelectInput
+                name={`Contact_Details.Social.${ind}.Type` as const}
+                label="Type"
+                defaultValue={obj?.Type}
+                options={[
+                  { value: "Facebook", displayText: "Facebook" },
+                  { value: "Twitter", displayText: "Twitter" },
+                  { value: "Instagram", displayText: "Instagram" },
+                ]}
+                error={
+                  formState?.errors?.Contact_Details?.Social[ind]?.Type?.message
+                }
               />
             </Box>
           );

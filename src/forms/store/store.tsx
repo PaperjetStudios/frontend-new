@@ -12,7 +12,7 @@ import { Button } from "@mui/material";
 import colors from "../../theme/colors";
 import useStore from "../../components/store/useStore";
 import useUser from "../user/useUser";
-import { StoreData } from "../../components/store/types";
+import { StoreData as storeDataType } from "../../components/store/types";
 
 import StoreAddressBlock from "./address";
 import SocialBlock from "./social";
@@ -66,7 +66,7 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
   } = useStore();
   const { id } = useUser();
 
-  const methods = useForm<StoreData>({
+  const methods = useForm<storeDataType>({
     defaultValues: {
       Title: storeData?.Title ? storeData?.Title : "",
       Description: storeData?.Description ? storeData?.Description : "",
@@ -200,11 +200,10 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
   }
 
   // Define strapiUpload function
-  const uploadFilesToStrapi = async (imagedata: any) => {
+  const uploadFilesToStrapi = async (imagedata: any, field: string) => {
     let files: any = null;
+    const compressedImages = [];
     if (imagedata?.length > 0) {
-      const compressedImages = [];
-
       // Compress images
       for (const item of imagedata) {
         console.log("Item: ", item);
@@ -213,15 +212,29 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         compressedImages.push(await compressImage(item.file as File));
       }
 
+      console.log("Compressed Images: ", compressedImages);
+
       files = await uploadFiles({
         variables: {
           files: compressedImages,
+          field: [field],
         },
       });
     }
 
+    if (imagedata?.length === 0) {
+      files = await uploadFiles({
+        variables: {
+          files: imagedata,
+          field: [field],
+        },
+      });
+    }
+
+    console.log("Files: ", files);
+
     const uploadedImageIds =
-      files !== null
+      files !== null && files?.data?.multipleUpload !== null
         ? files?.data?.multipleUpload.map((img: any) => {
             console.log(img);
             return img.data.id;
@@ -231,12 +244,15 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
     return uploadedImageIds;
   };
 
-  const submit: SubmitHandler<StoreData> = async (data) => {
+  const submit: SubmitHandler<storeDataType> = async (data) => {
     if (storeData) {
       console.log("(Update) submit data: ", data);
       // Upload images to Strapi
-      const featuredImage = await uploadFilesToStrapi(data.Featured_Image);
-      const gallery = await uploadFilesToStrapi(data.Gallery);
+      const Featured_Image = await uploadFilesToStrapi(
+        data.Featured_Image,
+        "Featured_Image"
+      );
+      const Gallery = await uploadFilesToStrapi(data.Gallery, "Gallery");
 
       const variables = {
         ...data.Contact_Details.Address,
@@ -248,8 +264,8 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         Rating: data.Rating,
         slug: data.slug,
         userID: id,
-        Featured_Image: featuredImage[0],
-        Gallery: gallery,
+        Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
+        Gallery: Gallery,
       };
 
       try {
@@ -262,8 +278,11 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
     } else {
       console.log("(Create) submit data: ", data);
       // Upload images to Strapi
-      const featuredImage = await uploadFilesToStrapi(data.Featured_Image);
-      const gallery = await uploadFilesToStrapi(data.Gallery);
+      const Featured_Image = await uploadFilesToStrapi(
+        data.Featured_Image,
+        "Featured_Image"
+      );
+      const Gallery = await uploadFilesToStrapi(data.Gallery, "Gallery");
 
       const variables = {
         ...data.Contact_Details.Address,
@@ -275,8 +294,8 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         Rating: data.Rating,
         slug: data.slug,
         userID: id,
-        Featured_Image: featuredImage[0],
-        Gallery: gallery,
+        Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
+        Gallery: Gallery,
       };
       try {
         createStore({
