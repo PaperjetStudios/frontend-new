@@ -90,6 +90,7 @@ const Product: React.FC<Props> = ({ children }) => {
 								gap: 1,
 								borderTop: 1,
 								borderBottom: 1,
+								justifyContent: 'flex-start',
 								borderColor: colors['grey'],
 								py: 4,
 								my: 5,
@@ -118,7 +119,7 @@ const Product: React.FC<Props> = ({ children }) => {
 										(typeof updateCart === 'boolean' && <Loader />)}
 								</Button>
 							</Grid>
-							<Grid item xs={3} xl={3}>
+							<Grid item xs={3} lg={1} xl={3}>
 								<Button variant='iconBox'>{Icons.heart}</Button>
 							</Grid>
 						</Grid>

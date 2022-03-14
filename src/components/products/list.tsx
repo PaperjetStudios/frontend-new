@@ -1,11 +1,17 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 
-import { Grid, Pagination } from '@mui/material';
+import { Grid, Box } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
+
 import { ApolloError, useQuery } from '@apollo/client';
+
+import { useLocation } from 'react-router-dom';
 
 import Loader from '../loader';
 import { paginated_products } from './queries';
 import ProductCard from './card';
+import ProductFilter from './filter';
+import PJSPagination from '../pagination';
 
 type Props = {
 	pageSize: number;
@@ -13,6 +19,8 @@ type Props = {
 	categorySlug?: string;
 	tagsSlug?: string;
 	storeSlug?: string;
+	condition?: 'Any' | 'New' | 'Used';
+	displayFilterBar?: boolean;
 };
 
 const ProductCardList: React.FC<Props> = ({
@@ -21,15 +29,29 @@ const ProductCardList: React.FC<Props> = ({
 	categorySlug = '',
 	tagsSlug = '',
 	storeSlug = '',
+	condition = '',
+	displayFilterBar = false,
 }) => {
+	const location = useLocation();
+	const query = new URLSearchParams(location.search);
+	const pageParam = parseInt(query.get('page') || '1', 10);
+
+	// Reload component when page number changes
+	useEffect(() => {
+		setCurrentPage(pageParam);
+	}, [pageParam]);
+
 	const [currentPage, setCurrentPage] = React.useState(page);
 
-	const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
-		setCurrentPage(value);
+	// Just an example of the filter bar
+	const [productCondition, setProductCondition] = React.useState(condition);
+
+	const handleFilterChange = (event: SelectChangeEvent) => {
+		setProductCondition(event.target.value);
 	};
 
 	const { loading, data } = useQuery(
-		paginated_products(categorySlug, storeSlug, tagsSlug),
+		paginated_products(categorySlug, storeSlug, tagsSlug, productCondition),
 		{
 			variables: {
 				pageSize: pageSize,
@@ -50,6 +72,15 @@ const ProductCardList: React.FC<Props> = ({
 
 	return (
 		<>
+			{displayFilterBar && (
+				// Conditionally load the filter bar so this component can be re-used for the "Related Products" etc on Product pages
+				<Box sx={{ justifyContent: 'flex-end', display: 'flex', my: 7 }}>
+					<ProductFilter
+						filter={productCondition}
+						onChangeValue={handleFilterChange}
+					/>
+				</Box>
+			)}
 			<Grid
 				container
 				spacing={{
@@ -57,9 +88,9 @@ const ProductCardList: React.FC<Props> = ({
 					md: 3,
 					xl: 6,
 				}}
-				justifyContent='space-between'
+				justifyContent='flex-start'
 				sx={{
-					pt: 7,
+					pt: 4,
 					pb: 3,
 				}}>
 				{data.products.data.map((obj: any, ind: number) => {
@@ -70,19 +101,10 @@ const ProductCardList: React.FC<Props> = ({
 					);
 				})}
 			</Grid>
-			<Pagination
-				count={data.products.meta.pagination.pageCount}
-				size='small'
-				page={currentPage}
-				onChange={handleChange}
-				sx={{
-					display: 'flex',
-					justifyContent: {
-						xs: 'center',
-						md: 'flex-end',
-					},
-				}}
-			/>
+
+			{data.products.meta.pagination.pageCount !== 1 && (
+				<PJSPagination count={data.products.meta.pagination.pageCount} />
+			)}
 		</>
 	);
 };

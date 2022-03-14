@@ -94,6 +94,7 @@ const PJSTabs: React.FC<TabsProps> = ({ tabs, defaultTab = 0 }) => {
 					{tabs.map((tab, index) => {
 						return (
 							<Tab
+								sx={{ textTransform: 'capitalize', letterSpacing: 0 }}
 								disableRipple
 								key={tab.title}
 								label={tab.title}
