@@ -15,6 +15,8 @@ import { createProductLink, currentApi } from '../../config/config';
 import colors from '../../theme/colors';
 import { moneyFormatter } from '../../config/util';
 import { useNavigate } from 'react-router-dom';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 type Props = {
 	id: number;
@@ -35,8 +37,16 @@ const CustomizedCard = styled(Card)`
 		opacity: 1;
 	}
 
+	.wishlist-icon-card:hover svg path {
+		fill: ${colors['secondary']};
+	}
+
 	:hover {
 		transform: translateY(-5px);
+	}
+
+	.MuiCardActionArea-focusHighlight {
+		background-color: transparent;
 	}
 `;
 
@@ -68,12 +78,6 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 			<CardActionArea
 				onClick={() => {
 					navigate(createProductLink(id.toString()));
-				}}
-				// Move this to top
-				sx={{
-					'.MuiCardActionArea-focusHighlight': {
-						backgroundColor: 'transparent',
-					},
 				}}
 				disableRipple>
 				<Box
