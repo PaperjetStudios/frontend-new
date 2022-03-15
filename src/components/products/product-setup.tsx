@@ -1,7 +1,7 @@
 import React from "react";
 
 import Box from "../box";
-import ProductForm from "../../forms/store/product";
+import ProductForm from "../../forms/product/product";
 
 const ProductSetup = () => {
   return (
