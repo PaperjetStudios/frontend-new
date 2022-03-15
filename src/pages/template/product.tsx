@@ -20,9 +20,15 @@ type Props = {};
 const Product: React.FC<Props> = ({ children }) => {
   const { product } = useParams();
 
-  const { update: updateCart, loading: cartLoading } = useCart();
+  const {
+    update: updateCart,
+    loading: cartLoading,
+    togglePreview,
+    getStatus,
+  } = useCart();
 
   const [quantity, setQuantity] = useState<number>(1);
+  const [currentVariation, setVariation] = useState<number>(0);
 
   const { loading, data } = useQuery(
     gql`
@@ -76,7 +82,11 @@ const Product: React.FC<Props> = ({ children }) => {
               </Typography>
             </Box>
             <Box className="mt-5 flex gap-5 border-t border-grey pt-5">
-              <Quantity value={quantity} setValue={setQuantity} max={5} />
+              <Quantity
+                value={quantity}
+                setValue={setQuantity}
+                max={Variation[0].Quantity}
+              />
 
               <Button
                 variant="contained"
@@ -93,7 +103,7 @@ const Product: React.FC<Props> = ({ children }) => {
                 }}
               >
                 <Box className="mr-2 text-lg">{Icons.shoppingcart}</Box>
-                Add to Cart{" "}
+                Add to Cart
                 {cartLoading || (typeof updateCart === "boolean" && <Loader />)}
               </Button>
 
