@@ -125,3 +125,16 @@ export const paginated_products = (
   }
 `;
 };
+
+export const GET_TAGS = gql`
+  query {
+    tags {
+      data {
+        id
+        attributes {
+          Title
+        }
+      }
+    }
+  }
+`;

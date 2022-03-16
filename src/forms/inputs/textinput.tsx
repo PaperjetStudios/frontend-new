@@ -27,11 +27,10 @@ const PJSTextInput: React.FC<TextInputProps> = ({
   password,
   multiline,
 }) => {
-  const { control, formState } = useFormContext(); // retrieve all hook methods
+  const { control } = useFormContext(); // retrieve all hook methods
 
   let errorElement = null;
-
-  if (formState?.errors[name]) {
+  if (error) {
     errorElement = <Alert severity="warning">{error}</Alert>;
   }
 

@@ -40,6 +40,8 @@ module.exports = {
       spacing: {
         searchbar: sizes["searchbar"],
         wrapper: `${sizes["pageWidth"]}px`,
+        "4/5": "80%",
+        "9/10": "90%",
       },
       maxWidth: {
         wrapper: `${sizes["pageWidth"]}px`,
