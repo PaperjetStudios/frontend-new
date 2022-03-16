@@ -6,6 +6,8 @@ import { Select, Alert, InputLabel, FormControl } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import InputBase from "@mui/material/InputBase";
+// Import Custom React Components
+import Box from "../../components/box";
 
 // import { size } from "./types";
 
@@ -50,26 +52,28 @@ const SelectInput: React.FC<Props> = ({
   }
 
   return (
-    <FormControl className="w-full text-left">
-      {errorElement}
-      <InputLabel htmlFor="select-input">{label}</InputLabel>
-      <Select
-        id="select-input"
-        label={label}
-        defaultValue={defaultValue}
-        {...register(name)}
-      >
-        {options &&
-          options.map((option) => {
-            // return <>option</>;
-            return (
-              <MenuItem value={option.value} className={option_className}>
-                {option.displayText}
-              </MenuItem>
-            );
-          })}
-      </Select>
-    </FormControl>
+    <Box className="mb-5">
+      <FormControl className="w-full text-left">
+        {errorElement}
+        <InputLabel htmlFor="select-input">{label}</InputLabel>
+        <Select
+          id="select-input"
+          label={label}
+          defaultValue={defaultValue}
+          {...register(name)}
+        >
+          {options &&
+            options.map((option) => {
+              // return <>option</>;
+              return (
+                <MenuItem value={option.value} className={option_className}>
+                  {option.displayText}
+                </MenuItem>
+              );
+            })}
+        </Select>
+      </FormControl>
+    </Box>
   );
 };
 

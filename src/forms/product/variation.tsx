@@ -1,7 +1,5 @@
 import React from "react";
-import classNames from "classnames";
 // Import Form Libraries
-import * as yup from "yup";
 import { useFieldArray, useFormContext } from "react-hook-form";
 // Import MaterialUI Components
 import {
@@ -10,6 +8,7 @@ import {
   FormControlLabel,
   FormGroup,
   Switch,
+  Box as BoxMUI,
 } from "@mui/material";
 // Import Custom React Components
 import Box from "../../components/box";
@@ -39,14 +38,15 @@ const ProductVariation: React.FC<Props> = ({ name, className = "" }) => {
   );
 
   const watchedVariations = watch(name);
-  console.log("Watched Product Variations: ", watchedVariations);
+  //   console.log("Watched Product Variations: ", watchedVariations);
+
   const watchedHasVariation = watch("has_variations");
 
-  console.log("Fields: ", fields);
+  //   console.log("Fields: ", fields);
 
   return (
-    <Box className="px-4 pt-5 pb-5 text-left">
-      <FormControl>
+    <Box className="py-5 text-left">
+      <FormControl className="w-full px-4">
         <FormGroup className="text-left w-max">
           <FormControlLabel
             control={
@@ -59,39 +59,51 @@ const ProductVariation: React.FC<Props> = ({ name, className = "" }) => {
             labelPlacement="start"
           />
         </FormGroup>
-        {watchedHasVariation && (
-          <Box className="md:grid md:grid-cols-2 gap-5 mb-10">
-            {watchedVariations?.length > 0 &&
-              watchedVariations.map((variation, ind) => {
+        <BoxMUI
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+            gridGap: "20px",
+          }}
+        >
+          {watchedVariations?.length > 0 &&
+            watchedVariations.map((variation, ind) => {
+              if (
+                (!watchedHasVariation && ind == 0) ||
+                (watchedHasVariation && ind >= 0)
+              ) {
                 return (
                   <Box
                     className="relative px-8 pt-5 pb-2 border-grey border rounded-sm"
                     key={variation.id}
                   >
-                    <Button
-                      sx={{
-                        position: "absolute",
-                        right: -10,
-                        top: -10,
-                        background: "#000",
-                        color: "#fff",
-                        borderRadius: "100%",
-                        width: "40px !important",
-                        height: "40px !important",
-                        minWidth: "0",
-                        fontSize: 20,
-                        "&:hover": {
-                          background: "#ccc",
-                        },
-                      }}
-                      onClick={() => {
-                        remove(ind);
-                      }}
-                    >
-                      {Icons.close}
-                    </Button>
+                    {ind > 0 && (
+                      <Button
+                        sx={{
+                          position: "absolute",
+                          right: -10,
+                          top: -10,
+                          background: "#000",
+                          color: "#fff",
+                          borderRadius: "100%",
+                          width: "40px !important",
+                          height: "40px !important",
+                          minWidth: "0",
+                          fontSize: 20,
+                          "&:hover": {
+                            background: "#ccc",
+                          },
+                        }}
+                        onClick={() => {
+                          remove(ind);
+                        }}
+                      >
+                        {Icons.close}
+                      </Button>
+                    )}
+
                     <Typo t="p" className="text-center">
-                      Variation {ind + 1}
+                      Variation {watchedHasVariation && ind + 1}
                     </Typo>
                     <PJSTextInput
                       name={`${name}.${ind}.Quantity`}
@@ -115,8 +127,10 @@ const ProductVariation: React.FC<Props> = ({ name, className = "" }) => {
                     />
                   </Box>
                 );
-              })}
+              }
+            })}
 
+          {watchedHasVariation && (
             <Box vcenter hcenter>
               <Box
                 onClick={() =>
@@ -132,8 +146,8 @@ const ProductVariation: React.FC<Props> = ({ name, className = "" }) => {
                 {Icons.plus}
               </Box>
             </Box>
-          </Box>
-        )}
+          )}
+        </BoxMUI>
       </FormControl>
     </Box>
   );
