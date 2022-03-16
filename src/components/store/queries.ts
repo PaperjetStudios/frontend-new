@@ -22,6 +22,23 @@ export const BASE_STORE = gql`
         Type
       }
     }
+    DeliveryMethods {
+      data {
+        id
+        attributes {
+          Title
+          Description
+          Cost
+          Logo {
+            data {
+              attributes {
+                url
+              }
+            }
+          }
+        }
+      }
+    }
     Gallery {
       data {
         attributes {

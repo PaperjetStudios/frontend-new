@@ -1,53 +1,75 @@
-import { Button, Box, Typography } from '@mui/material';
-import { border } from '@mui/system';
-import { styled } from '@mui/material/styles';
-import colors from '../../theme/colors';
-import { Icons } from '../icons';
+import { Button, Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import colors from "../../theme/colors";
+import { Icons } from "../icons";
 
 type Props = {
-	max: number;
-	value: number;
-	setValue: (newValue: number) => void;
+  max: number;
+  value: number;
+  size?: "normal" | "small";
+  setValue: (newValue: number) => void;
 };
 
-const CustomizedButton = styled(Button)`
-	height: 44px;
-	color: ${colors['grey-medium']};
-	:hover {
-		color: ${colors['dark']};
-		background-color: transparent;
-	}
+const NormalButton = styled(Button)`
+  height: 44px;
+  color: ${colors["grey-medium"]};
+  :hover {
+    color: ${colors["dark"]};
+    background-color: transparent;
+  }
 `;
 
-const Quantity: React.FC<Props> = ({ value, max, setValue }) => {
-	const handleAdd = () => {
-		if (value < max) {
-			setValue(value + 1);
-		}
-	};
+const SmallButton = styled(Button)`
+  height: 30px;
+  color: ${colors["grey-medium"]};
+  :hover {
+    color: ${colors["dark"]};
+    background-color: transparent;
+  }
+  font-size: 12px;
+  min-width: 32px;
+`;
 
-	const handleMinus = () => {
-		if (value >= 2) {
-			setValue(value - 1);
-		}
-	};
+const Quantity: React.FC<Props> = ({
+  value,
+  max,
+  setValue,
+  size = "normal",
+}) => {
+  const handleAdd = () => {
+    if (value < max) {
+      setValue(value + 1);
+    }
+  };
 
-	return (
-		<Box
-			sx={{
-				border: 2,
-				display: 'flex',
-				alignItems: 'center',
-				borderColor: colors['grey-lighter'],
-				width: '140px',
-			}}>
-			<CustomizedButton onClick={handleMinus}>{Icons.minus}</CustomizedButton>
-			<Box>
-				<Typography variant='subtitle1'>{value}</Typography>
-			</Box>
-			<CustomizedButton onClick={handleAdd}>{Icons.plus}</CustomizedButton>
-		</Box>
-	);
+  const handleMinus = () => {
+    if (value >= 2) {
+      setValue(value - 1);
+    }
+  };
+
+  const ButtonSized = size === "normal" ? NormalButton : SmallButton;
+
+  return (
+    <Box
+      sx={{
+        border: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderColor: colors["grey-lighter"],
+        width: size === "normal" ? "140px" : "100px",
+      }}
+    >
+      <ButtonSized onClick={handleMinus}>{Icons.minus}</ButtonSized>
+      <Box>
+        <Typography variant={size === "normal" ? "subtitle1" : "small1"}>
+          {value}
+        </Typography>
+      </Box>
+      <ButtonSized onClick={handleAdd}>{Icons.plus}</ButtonSized>
+    </Box>
+  );
 };
 
 export default Quantity;

@@ -1,15 +1,13 @@
 import { Button } from "@mui/material";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { cartState } from "../../state/cart";
-import Box from "../box";
+import { CartItems, cartState } from "../../state/cart";
 
-import { default as MatBox } from "@mui/material/Box";
+import Box from "@mui/material/Box";
 import { Icons } from "../icons";
 import Loader from "../loader";
 import CartPreviewItem from "./cart-preview-item";
 import { CartItem } from "./types";
-import useCart from "./useCart";
 
 import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
@@ -34,7 +32,7 @@ const CartPreview: React.FC = () => {
       onClose={() => togglePreview(false)}
       onOpen={() => togglePreview(true)}
     >
-      <MatBox
+      <Box
         sx={{
           width: 450,
           height: "100%",
@@ -43,7 +41,7 @@ const CartPreview: React.FC = () => {
           justifyContent: "space-between",
         }}
       >
-        <MatBox
+        <Box
           sx={{
             width: "100%",
             display: "flex",
@@ -63,47 +61,71 @@ const CartPreview: React.FC = () => {
           >
             {Icons.close}
           </Button>
-        </MatBox>
+        </Box>
         {cart.loading && <Loader />}
-        {cart && (
+        {cart.cart.length > 0 && (
           <>
-            <Box className="border-t border-grey">
-              {cart?.attributes?.CartItem.map((obj: CartItem) => {
-                return (
-                  <CartPreviewItem
-                    {...obj}
-                    key={obj.Product.data.attributes.Title}
-                  />
-                );
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                flexGrow: 1,
+                mt: 1,
+                px: 1,
+                gap: "10px",
+              }}
+            >
+              {cart?.cart?.map((item: CartItems) => {
+                return item?.items?.map((obj: CartItem) => {
+                  return (
+                    <CartPreviewItem
+                      {...obj}
+                      key={obj.Product.data.attributes.Title}
+                    />
+                  );
+                });
               })}
+            </Box>
+            <Box sx={{ width: "100%" }}>
+              <Link to="/checkout">
+                <Button
+                  fullWidth
+                  sx={{
+                    borderRadius: "0px",
+                    fontSize: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 3,
+                    display: "flex",
+                    gap: 1,
+                  }}
+                  variant="contained"
+                >
+                  Checkout {Icons.shoppingcart}
+                </Button>
+              </Link>
             </Box>
           </>
         )}
-        {!cart && (
-          <Box className="w-full h-full flex justify-center items-center">
-            <p>No items in your cart yet</p>
+        {cart.cart.length === 0 && (
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              flexGrow: 1,
+              mt: 1,
+              px: 1,
+              gap: "10px",
+            }}
+          >
+            <p>No items in your cart yet!</p>
           </Box>
         )}
-        <Box className="w-full">
-          <Link to="/checkout">
-            <Button
-              fullWidth
-              sx={{
-                borderRadius: "0px",
-                fontSize: 16,
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 2,
-                display: "flex",
-                gap: 1,
-              }}
-              variant="contained"
-            >
-              Checkout {Icons.shoppingcart}
-            </Button>
-          </Link>
-        </Box>
-      </MatBox>
+      </Box>
     </SwipeableDrawer>
   );
 };
