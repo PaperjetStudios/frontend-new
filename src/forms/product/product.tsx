@@ -37,19 +37,10 @@ const schema = yup
       })
     ),
     Categories: yup
-      .array()
-      .of(
-        yup.object().shape({
-          Title: yup.string(),
-        })
-      )
+      .array(yup.string())
       .min(1, "Please select atleast one category")
       .required("required"),
-    Tags: yup.array().of(
-      yup.object().shape({
-        Title: yup.string(),
-      })
-    ),
+    Tags: yup.array(yup.string()),
     Feature_Image: yup
       .array()
       .min(1, "Please select atleast one image")
@@ -137,7 +128,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
             name={"Categories"}
             options={categoryOptions.map((category) => {
               return {
-                value: category.attributes.Title,
+                value: category.id,
                 displayText: category.attributes.Title,
               };
             })}
@@ -155,7 +146,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
             name={"Tags"}
             options={tagOptions.map((tag) => {
               return {
-                value: tag.attributes.Title,
+                value: tag.id,
                 displayText: tag.attributes.Title,
               };
             })}

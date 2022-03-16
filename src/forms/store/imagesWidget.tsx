@@ -148,7 +148,7 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
   );
 
   const watchedImages = watch(name);
-  console.log("Watched Images: ", watchedImages);
+  // console.log("Watched Images: ", watchedImages);
 
   // Define addImages function
   const addImages = async (e: React.ChangeEvent<HTMLInputElement>) => {

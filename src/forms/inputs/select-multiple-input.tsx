@@ -40,7 +40,7 @@ const SelectMultipleInput: React.FC<Props> = ({
 }) => {
   const { control, watch } = useFormContext();
 
-  // const watchedMultipleSelectValue = watch(name);
+  const watchedMultipleSelectValue = watch(name);
   // console.log("watchedMultipleSelectValue: ", {
   //   field: name,
   //   value: watchedMultipleSelectValue,
@@ -78,12 +78,21 @@ const SelectMultipleInput: React.FC<Props> = ({
               }
               renderValue={(selected) => (
                 <BoxMUI sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip
-                      key={`select-multiple-${name}-chip-item-${value}`}
-                      label={value}
-                    />
-                  ))}
+                  {selected.map((value) => {
+                    // Here we ensure that the displayText of the selected value
+                    // is displayed
+                    let selectedLabel = options.find((option) => {
+                      if (option.value === value) {
+                        return true;
+                      }
+                    });
+                    return (
+                      <Chip
+                        key={`select-multiple-${name}-chip-item-${value}`}
+                        label={selectedLabel.displayText}
+                      />
+                    );
+                  })}
                 </BoxMUI>
               )}
             >
