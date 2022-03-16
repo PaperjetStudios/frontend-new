@@ -28,26 +28,36 @@ const schema = yup
     has_variations: yup.boolean(),
     Condition: yup
       .string()
-      .required("Please select a condition of the product"),
+      .required("Please select the condition of the product"),
     Variation: yup.array().of(
       yup.object().shape({
-        Quantity: yup.string().required("Please insert a description"),
-        SKU: yup.string().required("Please insert SKU"),
+        Quantity: yup.string().required("Please insert a quantity"),
         Price: yup.string().required("Please insert a price"),
+        SKU: yup.string().required("Please insert SKU"),
       })
     ),
-    Categories: yup.array().of(
-      yup.object().shape({
-        Title: yup.string(),
-      })
-    ),
+    Categories: yup
+      .array()
+      .of(
+        yup.object().shape({
+          Title: yup.string(),
+        })
+      )
+      .min(1, "Please select atleast one category")
+      .required("required"),
     Tags: yup.array().of(
       yup.object().shape({
         Title: yup.string(),
       })
     ),
-    Featured_Image: yup.array(),
-    Gallery: yup.array(),
+    Feature_Image: yup
+      .array()
+      .min(1, "Please select atleast one image")
+      .required("required"),
+    Gallery: yup
+      .array()
+      .min(1, "Please select atleast one image")
+      .required("required"),
   })
   .required();
 
@@ -83,6 +93,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
   const onSubmit: SubmitHandler<any> = async (data) => {
     console.log("Submit data: ", data);
   };
+
+  console.log("FormState Errors: ", methods.formState?.errors);
+  console.log("FormState Errors: ", methods.formState?.errors?.Categories);
 
   return (
     <Box>
@@ -128,6 +141,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
                 displayText: category.attributes.Title,
               };
             })}
+            // I was having issues with using forState.errors for the
+            // Categories field since yup validation does not work/recognise
+            // the message field of the validation error for an array field
+            // Solution for now is ignore the type error
+            //@ts-ignore
+            error={methods.formState?.errors?.Categories?.message}
           />
 
           {/* Tags SelectMultipleInput */}
@@ -143,14 +162,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
           />
 
           {/* Product Variation Input */}
-          <ProductVariation name={"Variation"} />
+          <ProductVariation
+            name={"Variation"}
+            error={methods.formState?.errors?.Variation}
+          />
 
           {/* Product Feature_Image ImageWidget */}
-          <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm w-min">
+          <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm w-max">
             <Typo className="pb-5 text-left" t="h5">
               Product Image
             </Typo>
-            <ImagesWidget name={"Featured_Image"} limit={1} />
+            <ImagesWidget name={"Feature_Image"} limit={1} />
           </Box>
 
           {/* Product Gallery ImageWidget */}

@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import classNames from "classnames";
 // Import Form Libraries
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, Controller } from "react-hook-form";
 // Import MaterialUI Components
 import {
+  Alert,
   Button,
   FormControl,
   FormControlLabel,
@@ -28,79 +29,76 @@ type Props = {
     value: string;
     displayText: string;
   }[];
+  error?: string;
 };
 
 const SelectMultipleInput: React.FC<Props> = ({
   name,
   className = "",
   options,
+  error = "",
 }) => {
-  const { control, watch, setValue, register } = useFormContext();
+  const { control, watch } = useFormContext();
 
-  const { fields, append, remove } = useFieldArray(
-    //   <
-    //     StoreData,
-    //     "Contact_Details.Social"
-    //   >
-    {
-      control,
-      name: name,
-    }
-  );
-
-  const watchedMultipleSelectValue = watch(name);
+  // const watchedMultipleSelectValue = watch(name);
   // console.log("watchedMultipleSelectValue: ", {
   //   field: name,
   //   value: watchedMultipleSelectValue,
   // });
 
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setValue(name, value);
-  };
+  let errorElement = null;
+  if (error) {
+    errorElement = <Alert severity="warning">{error}</Alert>;
+  }
 
   return (
-    <Box className={classNames("text-left pb-5", className)}>
-      <FormControl sx={{ width: 300 }}>
-        <InputLabel id={`multiple-${name.toLowerCase()}-label`}>
-          {name}
-        </InputLabel>
-        <Select
-          labelId={`multiple-${name.toLowerCase()}-label`}
-          id={`multiple-${name.toLowerCase()}`}
-          multiple
-          value={watchedMultipleSelectValue}
-          onChange={handleChange}
-          {...register}
-          input={
-            <OutlinedInput
-              id={`select-multiple-${name.toLowerCase()}`}
-              label={name.toLowerCase()}
-            />
-          }
-          renderValue={(selected) => (
-            <BoxMUI sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip
-                  key={`select-multiple-${name}-chip-item-${value}`}
-                  label={value}
+    <Box
+      className={classNames("flex flex-col gap-3 mb-5 text-left", className)}
+    >
+      {errorElement}
+      <Controller
+        name={name}
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormControl sx={{ width: 300 }}>
+            <InputLabel id={`multiple-${name.toLowerCase()}-label`}>
+              {name}
+            </InputLabel>
+            <Select
+              labelId={`multiple-${name.toLowerCase()}-label`}
+              id={`multiple-${name.toLowerCase()}`}
+              multiple
+              value={value}
+              onChange={onChange}
+              input={
+                <OutlinedInput
+                  id={`select-multiple-${name.toLowerCase()}`}
+                  label={name.toLowerCase()}
                 />
-              ))}
-            </BoxMUI>
-          )}
-        >
-          {options.map((option, ind) => (
-            <MenuItem
-              key={`select-multiple-${name}-menu-item-${ind}`}
-              value={option.value}
+              }
+              renderValue={(selected) => (
+                <BoxMUI sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip
+                      key={`select-multiple-${name}-chip-item-${value}`}
+                      label={value}
+                    />
+                  ))}
+                </BoxMUI>
+              )}
             >
-              {option.displayText}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+              {options.map((option, ind) => (
+                <MenuItem
+                  key={`select-multiple-${name}-menu-item-${ind}`}
+                  value={option.value}
+                >
+                  {option.displayText}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      />
     </Box>
   );
 };

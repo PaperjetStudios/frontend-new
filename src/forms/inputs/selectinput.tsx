@@ -43,36 +43,45 @@ const SelectInput: React.FC<Props> = ({
   defaultValue = "",
   error = "",
 }) => {
-  const { register } = useFormContext();
+  const { control, watch } = useFormContext();
+
+  //   const watchedCondition = watch(name);
+  //   console.log("watchedCondition: ", watchedCondition);
 
   let errorElement = null;
-
   if (error) {
     errorElement = <Alert severity="warning">{error}</Alert>;
   }
 
   return (
-    <Box className="mb-5">
-      <FormControl className="w-full text-left">
-        {errorElement}
-        <InputLabel htmlFor="select-input">{label}</InputLabel>
-        <Select
-          id="select-input"
-          label={label}
-          defaultValue={defaultValue}
-          {...register(name)}
-        >
-          {options &&
-            options.map((option) => {
-              // return <>option</>;
-              return (
-                <MenuItem value={option.value} className={option_className}>
-                  {option.displayText}
-                </MenuItem>
-              );
-            })}
-        </Select>
-      </FormControl>
+    <Box className="flex flex-col gap-3 mb-5">
+      {errorElement}
+      <Controller
+        name={name}
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <FormControl className="w-full text-left">
+            <InputLabel htmlFor="select-input">{label}</InputLabel>
+            <Select
+              id="select-input"
+              label={label}
+              onChange={onChange}
+              value={value}
+              defaultValue={defaultValue}
+            >
+              {options &&
+                options.map((option) => {
+                  // return <>option</>;
+                  return (
+                    <MenuItem value={option.value} className={option_className}>
+                      {option.displayText}
+                    </MenuItem>
+                  );
+                })}
+            </Select>
+          </FormControl>
+        )}
+      />
     </Box>
   );
 };

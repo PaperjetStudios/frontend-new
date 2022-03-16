@@ -226,7 +226,7 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
 
   return (
     <>
-      {formState?.errors[name] && limit > 1 && (
+      {formState?.errors[name] && (
         <Alert className="mb-8" severity="warning">
           {formState?.errors[name]?.message}
         </Alert>
