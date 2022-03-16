@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { userState } from "../../state/user";
 import { Product } from "../products/types";
 
-import _, { forEach } from "lodash";
+import { omit, forEach, filter } from "lodash";
 
 import { CartItem, CART_BASE } from "./types";
 import { cartState } from "../../state/cart";
 
 function useCart() {
   const user = userState.get();
-  const [cartItems, setCartItems] = cartState.use();
+  const [cartItems] = cartState.use();
 
   /* 
   // MUTATION - CREATE CART
@@ -83,6 +83,10 @@ function useCart() {
       }
     `,
     {
+      onCompleted: (data) => {
+        console.log("cart fetch", data);
+      },
+      fetchPolicy: "network-only",
       onError: (error: ApolloError) => {
         console.log(JSON.stringify(error));
       },
@@ -106,7 +110,6 @@ function useCart() {
 
   const compareQuantity = (product: Product, quantity: number) => {
     const maxQuantity = parseInt(product.attributes.Variation[0].Quantity);
-
     if (quantity > maxQuantity) {
       return maxQuantity;
     } else {
@@ -115,6 +118,8 @@ function useCart() {
   };
 
   const updateCart = async (list: CartItem[]) => {
+    await checkForCart();
+
     const cartData = cartItems.attributes?.CartItem;
     let newCartData: any[] = [];
 
@@ -135,7 +140,10 @@ function useCart() {
         newCartData.forEach((current: any) => {
           if (current.Product === obj.Product.data.id) {
             isAddition = false;
-            current.Quantity += obj.Quantity;
+            current.Quantity = compareQuantity(
+              obj.Product.data,
+              current.Quantity + obj.Quantity
+            );
           }
         });
         // Add if it doesn't exist on the list
@@ -149,7 +157,7 @@ function useCart() {
       });
 
       // make sure we don't have any negative or zeros
-      newCartData = _.filter(newCartData, (obj: CartItem) => {
+      newCartData = filter(newCartData, (obj: CartItem) => {
         return obj.Quantity > 0;
       });
 
@@ -160,7 +168,11 @@ function useCart() {
           products: { CartItem: newCartData },
         },
       }).then((cart) => {
-        setCartItems(cart.data.updateCart.data);
+        cartState.set((prevState) => ({
+          ...prevState,
+          ...cart.data.updateCart.data,
+          showing: true,
+        }));
       });
     }
   };
@@ -169,28 +181,50 @@ function useCart() {
   // USEEFFECT
   */
 
-  useEffect(() => {
-    //if we don't have a cart id yet
-    if (!user.cartId) {
-      // lets make it
-      createCartMutation().then((cart: any) => {
-        const cartId = cart.data.createCart?.data?.id;
-        userState.set({
-          ...user,
-          cartId: cartId,
-        });
-        // TODO if user is logged in, assign them their cart
+  function createCart(cartInfo) {
+    createCartMutation().then((cart: any) => {
+      const cartId = cart.data.createCart?.data?.id;
+      userState.set({
+        ...user,
+        cartId: cartId,
       });
-    } else if (user.cartId) {
-      // the user has cartid
-      getCartQuery({ variables: { cart: user.cartId } }).then((cart: any) => {
-        setCartItems(cart.data.cart.data);
-      });
+      cartState.set((prevState) => ({
+        ...prevState,
+        ...cartInfo.data.cart.data,
+      }));
+      console.log("setting", cartItems);
+    });
+  }
+
+  async function checkForCart() {
+    const cartInfo = await getCartQuery({ variables: { cart: user.cartId } });
+    console.log("check for cart start", cartInfo);
+    if (cartInfo.data.cart.data === null) {
+      createCart(cartInfo);
+    } else {
+      cartState.set((prevState) => ({
+        ...prevState,
+        ...cartInfo.data.cart.data,
+      }));
     }
-  }, [createCartData, user, setCartItems, createCartMutation, getCartQuery]);
+    console.log("check for cart complete", cartItems);
+  }
+
+  useEffect(() => {
+    const check = async () => {
+      await checkForCart();
+    };
+    console.log("use effect");
+    check();
+  }, []);
+
+  const getStatus = () => {
+    console.log(cartItems);
+  };
 
   return {
     update: updateCart,
+    getStatus: getStatus,
     togglePreview: togglePreview,
     showing: cartItems.showing,
     loading: createCartLoading || getCartLoading,

@@ -21,10 +21,10 @@ type Props = {};
 
 const Product: React.FC<Props> = ({ children }) => {
 	const { product } = useParams();
-
 	const { update: updateCart, loading: cartLoading } = useCart();
 
 	const [quantity, setQuantity] = useState<number>(1);
+
 
 	const { loading, data } = useQuery(
 		gql`
@@ -56,7 +56,7 @@ const Product: React.FC<Props> = ({ children }) => {
 
 	const { Title, Rating, Reviews, Description, Variation, Categories } =
 		data.product.data.attributes;
-
+    
 	return (
 		<LayoutContainer>
 			<Grid container sx={{ pt: 10 }}>
@@ -188,6 +188,7 @@ const Product: React.FC<Props> = ({ children }) => {
 			</Grid>
 		</LayoutContainer>
 	);
+
 };
 
 export default Product;

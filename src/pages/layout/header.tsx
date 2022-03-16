@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import BaseModal from "../../modal/base-modal";
 import { useState } from "react";
 import LoginModal from "../../modal/login-modal";
+import { cartState } from "../../state/cart";
 
 type Props = {
   className?: string;
@@ -21,6 +22,8 @@ type Props = {
 
 const Header: React.FC<Props> = ({ children }) => {
   const [loginModalOpen, loginModalToggle] = useState(false);
+
+  const [cart, setCart] = cartState.use();
 
   const { loading, data: options } = useQuery(options_query, {
     onCompleted: (data) => {
@@ -32,7 +35,7 @@ const Header: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const isLoggedIn = useLoggedIn();
+  const loginStatus = useLoggedIn();
 
   if (loading) {
     return <Loader />;
@@ -79,7 +82,7 @@ const Header: React.FC<Props> = ({ children }) => {
             >
               Become a Seller
             </Button>
-            {!isLoggedIn && (
+            {loginStatus.isLoggedIn !== null && !loginStatus.isLoggedIn && (
               <Button
                 sx={{
                   ...topMenuLinkStyle,
@@ -92,7 +95,7 @@ const Header: React.FC<Props> = ({ children }) => {
                 Log In / Sign Up
               </Button>
             )}
-            {isLoggedIn && (
+            {loginStatus.isLoggedIn !== null && loginStatus.isLoggedIn && (
               <Link to="/profile">
                 <Button
                   sx={{
@@ -131,11 +134,18 @@ const Header: React.FC<Props> = ({ children }) => {
               {Icons.heart}
             </Button>
             <Button
+              onClick={() => {
+                cartState.set((prevState) => ({
+                  ...prevState,
+                  showing: !prevState.showing,
+                }));
+              }}
               style={{
                 color: "#000",
                 fontSize: "20px",
                 padding: "0",
                 minWidth: "30px",
+                borderRadius: "100%",
               }}
             >
               {Icons.shoppingcart}

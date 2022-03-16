@@ -31,7 +31,8 @@ const PJSTextInput: React.FC<TextInputProps> = ({
 
   let errorElement = null;
 
-  if (formState?.errors[name]) {
+  if (error) {
+    // console.log("ERROR: ", formState?.errors[name]);
     errorElement = <Alert severity="warning">{error}</Alert>;
   }
 
