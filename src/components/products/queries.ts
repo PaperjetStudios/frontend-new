@@ -1,118 +1,126 @@
-import { gql } from '@apollo/client';
-import { BASE_CATEGORY } from '../categories/queries';
-import { BASE_REVIEW } from '../reviews/queries';
+import { gql } from "@apollo/client";
+import { BASE_CATEGORY } from "../categories/queries";
+import { BASE_REVIEW } from "../reviews/queries";
 
 export const BASE_PRODUCT = gql`
-	${BASE_REVIEW}
-	${BASE_CATEGORY}
-	fragment BASE_PRODUCT on Product {
-		Title
-		Description
-		slug
-		Rating
-		Variation {
-			Quantity
-			SKU
-			Price
-		}
-		Store {
-			data {
-				id
-				attributes {
-					Title
-					slug
-				}
-			}
-		}
-		Condition
-		Featured_Image {
-			data {
-				attributes {
-					url
-				}
-			}
-		}
-		Gallery {
-			data {
-				attributes {
-					url
-				}
-			}
-		}
-		Tags {
-			data {
-				id
-				attributes {
-					Title
-					slug
-				}
-			}
-		}
-		Reviews {
-			data {
-				id
-				attributes {
-					...BASE_REVIEW
-				}
-			}
-		}
-		Categories {
-			data {
-				id
-				attributes {
-					...BASE_CATEGORY
-				}
-			}
-		}
-	}
+  ${BASE_REVIEW}
+  ${BASE_CATEGORY}
+  fragment BASE_PRODUCT on Product {
+    Title
+    Description
+    slug
+    Rating
+    Variation {
+      Quantity
+      SKU
+      Price
+    }
+    Store {
+      data {
+        id
+        attributes {
+          Title
+          slug
+          DeliveryMethods {
+            data {
+              id
+              attributes {
+                Title
+              }
+            }
+          }
+        }
+      }
+    }
+    Condition
+    Featured_Image {
+      data {
+        attributes {
+          url
+        }
+      }
+    }
+    Gallery {
+      data {
+        attributes {
+          url
+        }
+      }
+    }
+    Tags {
+      data {
+        id
+        attributes {
+          Title
+          slug
+        }
+      }
+    }
+    Reviews {
+      data {
+        id
+        attributes {
+          ...BASE_REVIEW
+        }
+      }
+    }
+    Categories {
+      data {
+        id
+        attributes {
+          ...BASE_CATEGORY
+        }
+      }
+    }
+  }
 `;
 
 export const single_product_by_id = gql`
-	${BASE_PRODUCT}
-	query ($id: ID!) {
-		product(id: $id) {
-			data {
-				attributes {
-					...BASE_PRODUCT
-				}
-			}
-		}
-	}
+  ${BASE_PRODUCT}
+  query ($id: ID!) {
+    product(id: $id) {
+      data {
+        attributes {
+          ...BASE_PRODUCT
+        }
+      }
+    }
+  }
 `;
 
 export const paginated_products = (
-	categorySlug: string,
-	storeSlug: string,
-	tagSlug: string,
-	condition: string
+  categorySlug: string,
+  storeSlug: string,
+  tagSlug: string,
+  condition: string
 ) => {
-	//BUILD FILTERS
-	let filters = '';
+  //BUILD FILTERS
+  let filters = "";
 
-	if (categorySlug !== '') {
-		filters += `Categories:{slug: {contains:"${categorySlug}"}}`;
-	}
+  if (categorySlug !== "") {
+    filters += `Categories:{slug: {contains:"${categorySlug}"}}`;
+  }
 
-	if (storeSlug !== '') {
-		filters += `Store:{slug: {contains:${storeSlug}}}`;
-	}
+  if (storeSlug !== "") {
+    filters += `Store:{slug: {contains:${storeSlug}}}`;
+  }
 
-	if (tagSlug !== '') {
-		filters += `Tags:{slug: {contains:${tagSlug}}}`;
-	}
+  if (tagSlug !== "") {
+    filters += `Tags:{slug: {contains:${tagSlug}}}`;
+  }
 
-	if (condition !== '' && condition !== 'Any') {
-		filters += `Condition:{contains:"${condition}"}`;
-	}
+  if (condition !== "" && condition !== "Any") {
+    filters += `Condition:{contains:"${condition}"}`;
+  }
 
-	// if ( price !== 0 ) {
-	//    filters+= '';
-	// }
+  // if ( price !== 0 ) {
+  //    filters+= '';
+  // }
 
-	// Sorting
-	// let sort = '';
+  // Sorting
+  // let sort = '';
 
-	return gql`
+  return gql`
   query (
     $page: Int
     $pageSize: Int

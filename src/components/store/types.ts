@@ -19,6 +19,18 @@ export type StoreData = {
   };
   Featured_Image: any[];
   Gallery: any[];
+  DeliveryMethods: {
+    data: {
+      id: number | string;
+      attributes: DeliveryMethod;
+    }[];
+  };
+};
+export type DeliveryMethod = {
+  Title: string;
+  Description: string;
+  Cost: string;
+  Logo: EcomImage;
 };
 
 export type StoreAddress = {
