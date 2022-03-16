@@ -121,13 +121,14 @@ const ProductVariation: React.FC<Props> = ({
                           name={`${name}.${ind}.Quantity`}
                           label={"Quantity"}
                           placeholder={"Quantity"}
+                          type={"number"}
                           error={error[ind]?.Quantity?.message}
                         />
                         <PJSTextInput
                           name={`${name}.${ind}.Price`}
                           label={"Price"}
                           placeholder={"Price"}
-                          // type={"number"}
+                          type={"number"}
                           error={error[ind]?.Price?.message}
                         />
                         <PJSTextInput

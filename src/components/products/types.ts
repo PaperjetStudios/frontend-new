@@ -50,5 +50,29 @@ export type Product = {
         attributes: Review[];
       };
     };
+    Categories: {
+      data: {
+        id: string | number;
+        attributes: {
+          Title: string;
+          slug: string;
+        };
+      }[];
+    };
   };
+};
+
+export type ProductData_SubmitType = {
+  Title: string;
+  Description: string;
+  Condition: string;
+  Variation: {
+    Quantity: string;
+    SKU: string;
+    Price: string;
+  }[];
+  Store: number | string;
+  Featured_Image: any[];
+  Gallery: any[];
+  Tags: string[];
 };

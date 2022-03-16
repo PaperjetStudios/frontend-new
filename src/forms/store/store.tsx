@@ -217,7 +217,8 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
       files = await uploadFiles({
         variables: {
           files: compressedImages,
-          field: [field],
+          field: field,
+          forStore: true,
         },
       });
     }
@@ -226,7 +227,8 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
       files = await uploadFiles({
         variables: {
           files: imagedata,
-          field: [field],
+          field: field,
+          forStore: true,
         },
       });
     }
@@ -246,6 +248,7 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
 
   const submit: SubmitHandler<storeDataType> = async (data) => {
     if (storeData) {
+      // Update store
       console.log("(Update) submit data: ", data);
       // Upload images to Strapi
       const Featured_Image = await uploadFilesToStrapi(
@@ -276,6 +279,7 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         console.log("OnSubmit Update Store Error: ", e);
       }
     } else {
+      // Create store
       console.log("(Create) submit data: ", data);
       // Upload images to Strapi
       const Featured_Image = await uploadFilesToStrapi(

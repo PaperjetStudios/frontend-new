@@ -138,3 +138,49 @@ export const GET_TAGS = gql`
     }
   }
 `;
+
+export const UPLOAD_MULTIPLE_PRODUCT_FILES = gql`
+  mutation ($files: [Upload]!, $field: String!, $forProduct: Boolean) {
+    multipleUpload(files: $files, field: $field, forProduct: $forProduct) {
+      data {
+        id
+      }
+    }
+  }
+`;
+
+export const CREATE_PRODUCT = gql`
+  ${BASE_PRODUCT}
+  mutation (
+    $Title: String
+    $Description: String
+    $Condition: ENUM_PRODUCT_CONDITION
+    $Variation: [ComponentProductVariationInput]
+    $Store: ID
+    $Featured_Image: ID
+    $Gallery: [ID]
+    $Categories: [ID]
+    $Tags: [ID]
+  ) {
+    createProduct(
+      data: {
+        Title: $Title
+        Description: $Description
+        Condition: $Condition
+        Variation: $Variation
+        Store: $Store
+        Featured_Image: $Featured_Image
+        Gallery: $Gallery
+        Categories: $Categories
+        Tags: $Tags
+      }
+    ) {
+      data {
+        id
+        attributes {
+          ...BASE_PRODUCT
+        }
+      }
+    }
+  }
+`;

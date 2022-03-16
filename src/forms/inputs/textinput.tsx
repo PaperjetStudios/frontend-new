@@ -16,6 +16,7 @@ type TextInputProps = FormInputProps & {
   placeholder: string;
   label?: string;
   password?: boolean;
+  type?: string;
   multiline?: boolean;
 };
 
@@ -25,6 +26,7 @@ const PJSTextInput: React.FC<TextInputProps> = ({
   error,
   label,
   password,
+  type,
   multiline,
 }) => {
   const { control } = useFormContext(); // retrieve all hook methods
@@ -45,17 +47,22 @@ const PJSTextInput: React.FC<TextInputProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextField
-            multiline={multiline}
-            maxRows={4}
-            label={label ? label : ""}
-            onChange={onChange}
-            value={value}
-            placeholder={placeholder}
-            {...extraParams}
-          />
-        )}
+        render={({ field: { onChange, value } }) => {
+          console.log(`${name} value: `, value);
+          console.log(`Type of ${name} value: `, typeof value);
+          return (
+            <TextField
+              multiline={multiline}
+              maxRows={4}
+              type={type}
+              label={label ? label : ""}
+              onChange={onChange}
+              value={value}
+              placeholder={placeholder}
+              {...extraParams}
+            />
+          );
+        }}
       />
     </Box>
   );

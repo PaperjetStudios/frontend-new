@@ -15,15 +15,17 @@ import { StoreData } from "./types";
 function useStore() {
   const [storeData, setStoreData] = useState<StoreData | null>();
   const [loadingStore, setLoadingStore] = useState(true);
+  const [storeID, setStoreID] = useState(null);
   const { id, userData, loadingUser } = useUser();
 
   const [getStore, { loading, error, data: getStoreData }] = useLazyQuery(
     GET_STORE_BY_USER_ID,
     {
       onCompleted: (data) => {
-        setLoadingStore(false);
         console.log("GetStore data", data);
         setStoreData(data.findMyStore.data.attributes);
+        setStoreID(data.findMyStore.data.id);
+        setLoadingStore(false);
       },
       onError: (error: ApolloError) => {
         console.log(error);
@@ -99,6 +101,7 @@ function useStore() {
   return {
     loadingStore: loadingStore,
     storeData: storeData,
+    storeID: storeID,
     getStore: getStore,
     createStore: createStore,
     updateStore: updateStore,
