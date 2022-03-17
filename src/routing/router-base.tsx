@@ -25,6 +25,10 @@ import ProfilePage from "../pages/profile/profile";
 import OrderHolder from "../pages/template/order-holder";
 import OrderHolderStore from "../pages/template/order-holder-store";
 import Order from "../pages/template/order";
+import OrderList from "../components/orders/table-list";
+import ShopSetup from "../components/store/setup";
+import ProductSetup from "../components/products/product-setup";
+import Box from "../components/box";
 
 /* <Authorized guest redirect="/profile">
             <LoginRegisterPage />
@@ -43,12 +47,15 @@ const BaseRoutes: React.FC = () => {
       <Route path="/profile/" element={<ProfilePage />}>
         <Route index element={<Account />} />
         <Route path="wishlist" element={<Wishlist />} />
-        <Route path="orders" element={<Orders />} />
         <Route path="order" element={<OrderHolder />}>
           <Route path=":order" element={<Order />} />
         </Route>
-        <Route path="shop" element={<Shop />} />
-        <Route path="wallet" element={<Wallet />} />
+        <Route path="shop" element={<Shop />}>
+          <Route index element={<OrderList seller />} />
+          <Route path="setup" element={<ShopSetup />} />
+          <Route path="products" element={<ProductSetup />} />
+          <Route path="banking_details" element={<Box />} />
+        </Route>
       </Route>
 
       <Route path="/wizard" element={<WizardTest />} />
