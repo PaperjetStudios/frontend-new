@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   ApolloError,
   useQuery,
@@ -14,11 +14,13 @@ import {
   GET_TAGS,
   UPLOAD_MULTIPLE_PRODUCT_FILES,
   CREATE_PRODUCT,
+  UPDATE_PRODUCT,
   single_product_by_id,
+  GET_PRODUCT_BY_SLUG,
 } from "./queries";
 import { GET_CATEGORIES } from "../categories/queries";
 
-const useProduct = () => {
+const useProduct = (slug?: string) => {
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
   const [productData, setProductData] = useState<Product>(null);
@@ -41,6 +43,27 @@ const useProduct = () => {
       setTags(null);
     },
   });
+
+  const { loading: loadingGetProductBySlug, data } = useQuery(
+    GET_PRODUCT_BY_SLUG,
+    {
+      skip: slug ? false : true,
+      variables: {
+        slug: slug,
+      },
+      onCompleted: (data) => {
+        // console.log("Get Product but slug data: ", data);
+        if (data.products.data.length > 0) {
+          delete data.products.data[0].Reviews;
+          //   console.log("Get Product but slug: ", data.products.data[0]);
+          setProductData(data.products.data[0]);
+        }
+      },
+      onError: (error: ApolloError) => {
+        console.log(JSON.stringify(error));
+      },
+    }
+  );
 
   const [
     getSingleProductByID,
@@ -100,13 +123,29 @@ const useProduct = () => {
     }
   );
 
+  // Define updateProduct mutation
+  const [updateProduct, { loading: updateProductLoading }] = useMutation(
+    UPDATE_PRODUCT,
+    {
+      onCompleted: (data) => {
+        console.log("Created product: ", data);
+        setProductData(data.updateProduct.data);
+      },
+      onError: (e) => {
+        console.log("error", JSON.stringify(e));
+      },
+    }
+  );
+
   // set the loadingProduct state variable
   useEffect(() => {
     if (
       loadingGetCategories ||
       loadingGetTags ||
+      loadingGetProductBySlug ||
       imageUploading ||
-      createProductLoading
+      createProductLoading ||
+      updateProductLoading
     ) {
       if (!loadingProductData) {
         setLoadingProductData(true);
@@ -116,7 +155,13 @@ const useProduct = () => {
         setLoadingProductData(false);
       }
     }
-  }, [loadingGetTags, loadingGetCategories]);
+  }, [
+    loadingGetTags,
+    loadingGetCategories,
+    loadingGetProductBySlug,
+    createProductLoading,
+    updateProductLoading,
+  ]);
 
   return {
     tagOptions: tags,
@@ -126,6 +171,7 @@ const useProduct = () => {
     storeID,
     uploadProductFiles,
     createProduct,
+    updateProduct,
     getSingleProductByID,
   };
 };

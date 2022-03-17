@@ -1,12 +1,7 @@
-import { Alert, Button, TextField } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 
 import React from "react";
-import {
-  useForm,
-  FormProvider,
-  useFormContext,
-  Controller,
-} from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 
 import Box from "../../components/box";
 
@@ -48,8 +43,6 @@ const PJSTextInput: React.FC<TextInputProps> = ({
         name={name}
         control={control}
         render={({ field: { onChange, value } }) => {
-          console.log(`${name} value: `, value);
-          console.log(`Type of ${name} value: `, typeof value);
           return (
             <TextField
               multiline={multiline}

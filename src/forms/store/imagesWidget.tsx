@@ -148,7 +148,6 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
   );
 
   const watchedImages = watch(name);
-  console.log("Watched Images: ", { field: name, value: watchedImages });
 
   // Define addImages function
   const addImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +205,7 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
         // Display image, i.e. render DisplayImage component
         return (
           <ImageDisplay
-            key={`image-display-${j}`}
+            key={`image-widget-${name}-image-display-${j}`}
             src={image}
             onClick={() => {
               console.log("Fields: ", fields);
@@ -221,7 +220,12 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
 
   // Display AddImage component
   if (previews.length < limit) {
-    previews.push(<AddImage imageInputElementRef={imageInputElementRef} />);
+    previews.push(
+      <AddImage
+        key={`image-widget-${name}-add-image`}
+        imageInputElementRef={imageInputElementRef}
+      />
+    );
   }
 
   return (

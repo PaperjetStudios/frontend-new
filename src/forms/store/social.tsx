@@ -1,7 +1,5 @@
-import { useEffect } from "react";
-import classNames from "classnames";
+import React from "react";
 // Import Form Libraries
-import * as yup from "yup";
 import { useFieldArray, useFormContext } from "react-hook-form";
 // Import MaterialUI Components
 import { Button } from "@mui/material";
@@ -9,7 +7,6 @@ import { Button } from "@mui/material";
 import Box from "../../components/box";
 import PJSTextInput from "../inputs/textinput";
 import SelectInput from "../inputs/selectinput";
-import Loader from "../../components/loader";
 import { Icons } from "../../components/icons";
 import Typo from "../../components/typo";
 // Import Types
@@ -35,7 +32,7 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
   const watchedFields =
     fields.length > 0
       ? fields.map((field, index) => {
-          // Delete the field "__typename" to avaoid graphQL Errors
+          // Delete the field "__typename" to avoid graphQL Errors
           delete watchFieldArray[index]["__typename"];
           return {
             ...field,
@@ -43,8 +40,6 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
           };
         })
       : [];
-
-  console.log(`\n\n Watched Fields: \n`, watchFieldArray);
 
   return (
     <Box className="md:grid md:grid-cols-2 gap-5 mb-10">
@@ -81,6 +76,7 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
               <Typo className="pb-5" t="h5">
                 Social Link {ind + 1}
               </Typo>
+
               <PJSTextInput
                 name={`Contact_Details.Social.${ind}.Url` as const}
                 label="Url"
@@ -89,14 +85,6 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
                 }
                 placeholder="Url"
               />
-              {/* <PJSTextInput
-                name={`Contact_Details.Social.${ind}.Type` as const}
-                label="Type"
-                error={
-                  formState?.errors?.Contact_Details?.Social[ind]?.Type?.message
-                }
-                placeholder="Social Platform"
-              /> */}
 
               <SelectInput
                 name={`Contact_Details.Social.${ind}.Type` as const}

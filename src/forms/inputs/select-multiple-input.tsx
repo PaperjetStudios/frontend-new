@@ -1,24 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import classNames from "classnames";
 // Import Form Libraries
-import { useFieldArray, useFormContext, Controller } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 // Import MaterialUI Components
 import {
   Alert,
-  Button,
   FormControl,
-  FormControlLabel,
   InputLabel,
   Select,
   OutlinedInput,
   Chip,
   MenuItem,
-  FormGroup,
-  Switch,
   Box as BoxMUI,
 } from "@mui/material";
-// Import Custom Hooks
-import useProduct from "../../components/products/useProduct";
 // Import Custom React Components
 import Box from "../../components/box";
 
@@ -38,13 +32,7 @@ const SelectMultipleInput: React.FC<Props> = ({
   options,
   error = "",
 }) => {
-  const { control, watch } = useFormContext();
-
-  const watchedMultipleSelectValue = watch(name);
-  // console.log("watchedMultipleSelectValue: ", {
-  //   field: name,
-  //   value: watchedMultipleSelectValue,
-  // });
+  const { control, getValues } = useFormContext();
 
   let errorElement = null;
   if (error) {
@@ -70,6 +58,7 @@ const SelectMultipleInput: React.FC<Props> = ({
               multiple
               value={value}
               onChange={onChange}
+              defaultValue={getValues(name)}
               input={
                 <OutlinedInput
                   id={`select-multiple-${name.toLowerCase()}`}

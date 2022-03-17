@@ -1,16 +1,13 @@
-import { useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+// Import Types
+import { StoreData } from "../../components/store/types";
+// Import Custom React Components
 import Box from "../../components/box";
 import Typo from "../../components/typo";
 import PJSTextInput from "../inputs/textinput";
 
-import { useFormContext, Controller } from "react-hook-form";
-
-import { StoreData } from "../../components/store/types";
-
 const StoreAddressBlock: React.FC = () => {
-  const { formState, watch } = useFormContext<StoreData>();
-
-  // const watchAddress = watch("Contact_Details.Address");
+  const { formState } = useFormContext<StoreData>();
 
   return (
     <Box className="md:grid md:grid-cols-2 gap-5 mb-10">

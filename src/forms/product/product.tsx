@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import classNames from "classnames";
 // Import Form Libraries
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
@@ -24,6 +24,11 @@ import SelectMultipleInput from "../inputs/select-multiple-input";
 import Typo from "../../components/typo";
 import ImagesWidget from "../store/imagesWidget";
 import Loader from "../../components/loader";
+import {
+  GET_STORE_PRODUCTS_BY_USER_ID,
+  GET_PRODUCT_BY_SLUG,
+} from "../../components/products/queries";
+import { currentApi } from "../../config/config";
 
 const schema = yup
   .object()
@@ -59,9 +64,10 @@ const schema = yup
 
 type ProductFormProps = {
   className?: string;
+  slug: string;
 };
 
-const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
+const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
   const {
     tagOptions,
     categoryOptions,
@@ -70,7 +76,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
     storeID,
     uploadProductFiles,
     createProduct,
-  } = useProduct();
+    updateProduct,
+  } = useProduct(slug);
 
   // Define handling methods
   const methods = useForm({
@@ -104,6 +111,97 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
     resolver: yupResolver(schema),
   });
 
+  const setupLoadedDataImages = async (productData: any) => {
+    const images: any[] = productData?.attributes?.Gallery?.data;
+    const loadedImages: any[] = [];
+    if (images?.length > 0) {
+      for (let j = 0; j < images.length; j++) {
+        if (images[j]) {
+          // Create a file from the image to use it normally
+          let response = await fetch(
+            `${currentApi.url}${images[j]?.attributes?.url}`
+          );
+          let blobData = await response.blob();
+          const fileName: string = images[j]?.attributes?.name;
+          const file = new File([blobData], images[j]?.attributes?.name, {
+            type: `image/${fileName.split(".")[1]}`,
+          });
+
+          loadedImages.push({ file: file });
+        }
+      }
+    }
+
+    let file = [];
+    if (productData?.attributes?.Featured_Image?.data) {
+      let response = await fetch(
+        `${currentApi.url}${productData?.attributes?.Featured_Image?.data?.attributes?.url}`
+      );
+      let blobData = await response.blob();
+      const fileName: string =
+        productData?.attributes?.Featured_Image?.data?.attributes?.name;
+      file = [
+        {
+          file: new File(
+            [blobData],
+            productData?.attributes?.Featured_Image?.data?.attributes?.name,
+            {
+              type: `image/${fileName.split(".")[1]}`,
+            }
+          ),
+        },
+      ];
+    }
+
+    return {
+      featuredImage: file,
+      gallery: loadedImages as FileList[],
+    };
+  };
+
+  useEffect(() => {
+    if (productData) {
+      const setupImages = async () => {
+        const images = await setupLoadedDataImages(productData).then(
+          (data) => data
+        );
+
+        const newFormState = {
+          Title: productData ? productData.attributes.Title : "",
+          Description: productData ? productData.attributes.Description : "",
+          Condition: productData ? productData.attributes.Condition : "",
+          Variation: productData
+            ? productData.attributes.Variation
+            : [
+                {
+                  Quantity: 0,
+                  Price: "",
+                  SKU: "",
+                },
+              ],
+          Categories: productData
+            ? productData.attributes.Categories.data.map(
+                (category) => category.id
+              )
+            : [],
+          Tags: productData
+            ? productData.attributes.Tags.data.map((tag) => tag.id)
+            : [],
+          has_variations: true,
+          Featured_Image: images.featuredImage ? images.featuredImage : [],
+          Gallery: images.gallery ? images.gallery : [],
+        };
+
+        methods.reset(newFormState);
+      };
+      setupImages();
+    }
+  }, [productData]);
+
+  if (loadingProductData) {
+    return <Loader />;
+  }
+
   // Define strapiUpload function
   const uploadFilesToStrapi = async (imagedata: any, field: string) => {
     let files: any = null;
@@ -111,13 +209,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
     if (imagedata?.length > 0) {
       // Compress images
       for (const item of imagedata) {
-        console.log("Item: ", item);
-        console.log("Type of Item File: ", item.file instanceof File);
         //@ts-ignore
         compressedImages.push(await compressImage(item.file as File));
       }
-
-      console.log("Compressed Images: ", compressedImages);
 
       files = await uploadProductFiles({
         variables: {
@@ -138,8 +232,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
       });
     }
 
-    console.log("Files: ", files);
-
     const uploadedImageIds =
       files !== null && files?.data?.multipleUpload !== null
         ? files?.data?.multipleUpload.map((img: any) => {
@@ -157,6 +249,38 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
     if (productData) {
       // Update product
       console.log("(Update) submit data: ", data);
+      // Upload images to Strapi
+      const Featured_Image = await uploadFilesToStrapi(
+        data.Featured_Image,
+        "Featured_Image"
+      );
+      const Gallery = await uploadFilesToStrapi(data.Gallery, "Gallery");
+
+      const submittedData = data;
+      delete submittedData.Featured_Image;
+      delete submittedData.Gallery;
+
+      const variables = {
+        id: productData.id,
+        ...submittedData,
+        Variation: submittedData.Variation.map((item, ind) => {
+          //@ts-ignore
+          delete item?.__typename;
+          return item;
+        }),
+        Store: storeID,
+        Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
+        Gallery: Gallery,
+      };
+      console.log("variables: ", variables);
+      try {
+        console.log("CreateProduct mutation starts...");
+        updateProduct({
+          variables: variables,
+        });
+      } catch (e) {
+        console.log("OnSubmit Create Store Error: ", e);
+      }
     } else {
       // Create product
       console.log("(Create) submit data: ", data);
@@ -188,9 +312,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "" }) => {
       }
     }
   };
-
-  console.log("FormState Errors: ", methods.formState?.errors);
-  console.log("FormState Errors: ", methods.formState?.errors?.Categories);
 
   return (
     <Box>

@@ -1,26 +1,28 @@
+import React, { useEffect } from "react";
 import classNames from "classnames";
+// Import Form Libraries
 import * as yup from "yup";
-import Box from "../../components/box";
-import { useEffect } from "react";
-
-import PJSTextInput from "../inputs/textinput";
-import Loader from "../../components/loader";
-
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button } from "@mui/material";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+// Import Utility Functions And Variables
+import { compressImage } from "../../util/files";
+import { currentApi } from "../../config/config";
 import colors from "../../theme/colors";
+// Import Custom Hooks
 import useStore from "../../components/store/useStore";
 import useUser from "../user/useUser";
-import { StoreData as storeDataType } from "../../components/store/types";
-
+// Import MaterialUI Components
+import { Button } from "@mui/material";
+// Import Custom React Components
+import Box from "../../components/box";
+import PJSTextInput from "../inputs/textinput";
+import Loader from "../../components/loader";
 import StoreAddressBlock from "./address";
 import SocialBlock from "./social";
 import ImagesWidget from "./imagesWidget";
-
-import { compressImage } from "../../util/files";
 import Typo from "../../components/typo";
-import { currentApi } from "../../config/config";
+// Import Types
+import { StoreData as storeDataType } from "../../components/store/types";
 
 type Props = {
   className?: string;
@@ -109,11 +111,7 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
     resolver: yupResolver(schema),
   });
 
-  console.log("Form Errors: ", methods.formState?.errors);
-  console.log("Store Data: ", storeData);
-
   const setupLoadedDataImages = async (storeData: any) => {
-    console.log("Store Data: ", storeData);
     const images: any[] = storeData?.Gallery?.data;
     const loadedImages: any[] = [];
     if (images?.length > 0) {
@@ -179,12 +177,6 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
           (data) => data
         );
 
-        console.log("New Store Data: ", {
-          ...storeData,
-          Featured_Image: images.featuredImage ? images.featuredImage : [],
-          Gallery: images.gallery ? images.gallery : [],
-        });
-
         methods.reset({
           ...storeData,
           Featured_Image: images.featuredImage ? images.featuredImage : [],
@@ -206,13 +198,9 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
     if (imagedata?.length > 0) {
       // Compress images
       for (const item of imagedata) {
-        console.log("Item: ", item);
-        console.log("Type of Item File: ", item.file instanceof File);
         //@ts-ignore
         compressedImages.push(await compressImage(item.file as File));
       }
-
-      console.log("Compressed Images: ", compressedImages);
 
       files = await uploadFiles({
         variables: {
@@ -232,8 +220,6 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         },
       });
     }
-
-    console.log("Files: ", files);
 
     const uploadedImageIds =
       files !== null && files?.data?.multipleUpload !== null
@@ -290,30 +276,18 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
 
       const variables = {
         ...data.Contact_Details.Address,
-        ...data.Gallery,
         Social: [...data.Contact_Details.Social],
         Email: data.Contact_Details.Email,
         Title: data.Title,
         Description: data.Description,
-        Rating: data.Rating,
-        slug: data.slug,
-        userID: id,
         Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
         Gallery: Gallery,
+        seller: id,
       };
+      console.log("Variables: ", variables);
       try {
         createStore({
-          variables: {
-            ...data.Contact_Details.Address,
-            ...data.Gallery,
-            Social: [...data.Contact_Details.Social],
-            Email: data.Contact_Details.Email,
-            Title: data.Title,
-            Description: data.Description,
-            Rating: data.Rating,
-            slug: data.slug,
-            seller: id,
-          },
+          variables: variables,
         });
       } catch (e) {
         console.log("OnSubmit Create Store Error: ", e);

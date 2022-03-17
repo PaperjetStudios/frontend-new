@@ -70,10 +70,14 @@ const SelectInput: React.FC<Props> = ({
               defaultValue={defaultValue}
             >
               {options &&
-                options.map((option) => {
+                options.map((option, ind) => {
                   // return <>option</>;
                   return (
-                    <MenuItem value={option.value} className={option_className}>
+                    <MenuItem
+                      key={`select-input-${name}-menu-item-${ind}`}
+                      value={option.value}
+                      className={option_className}
+                    >
                       {option.displayText}
                     </MenuItem>
                   );

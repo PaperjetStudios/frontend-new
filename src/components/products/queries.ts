@@ -29,6 +29,7 @@ export const BASE_PRODUCT = gql`
       data {
         attributes {
           url
+          name
         }
       }
     }
@@ -36,6 +37,7 @@ export const BASE_PRODUCT = gql`
       data {
         attributes {
           url
+          name
         }
       }
     }
@@ -83,7 +85,8 @@ export const single_product_by_id = gql`
 export const paginated_products = (
   categorySlug: string,
   storeSlug: string,
-  tagSlug: string
+  tagSlug: string,
+  userID: string | number
 ) => {
   //BUILD FILTERS
   let filters = "";
@@ -98,6 +101,10 @@ export const paginated_products = (
 
   if (tagSlug !== "") {
     filters += `Tags:{slug: {contains:${tagSlug}}}`;
+  }
+
+  if (userID !== "") {
+    filters += ` Store: { Seller: { id: { eq: ${userID} } } } `;
   }
   return gql`
   query (
@@ -175,6 +182,72 @@ export const CREATE_PRODUCT = gql`
         Tags: $Tags
       }
     ) {
+      data {
+        id
+        attributes {
+          ...BASE_PRODUCT
+        }
+      }
+    }
+  }
+`;
+
+export const UPDATE_PRODUCT = gql`
+  ${BASE_PRODUCT}
+  mutation (
+    $Title: String
+    $Description: String
+    $Condition: ENUM_PRODUCT_CONDITION
+    $Variation: [ComponentProductVariationInput]
+    $Store: ID
+    $Featured_Image: ID
+    $Gallery: [ID]
+    $Categories: [ID]
+    $Tags: [ID]
+    $id: ID!
+  ) {
+    updateProduct(
+      id: $id
+      data: {
+        Title: $Title
+        Description: $Description
+        Condition: $Condition
+        Variation: $Variation
+        Store: $Store
+        Featured_Image: $Featured_Image
+        Gallery: $Gallery
+        Categories: $Categories
+        Tags: $Tags
+      }
+    ) {
+      data {
+        id
+        attributes {
+          ...BASE_PRODUCT
+        }
+      }
+    }
+  }
+`;
+
+export const GET_STORE_PRODUCTS_BY_USER_ID = gql`
+  ${BASE_PRODUCT}
+  query ($userID: ID!) {
+    products(filters: { Store: { Seller: { id: { eq: $userID } } } }) {
+      data {
+        id
+        attributes {
+          ...BASE_PRODUCT
+        }
+      }
+    }
+  }
+`;
+
+export const GET_PRODUCT_BY_SLUG = gql`
+  ${BASE_PRODUCT}
+  query ($slug: String) {
+    products(filters: { slug: { eq: $slug } }) {
       data {
         id
         attributes {

@@ -14,9 +14,10 @@ import {
   matchPath,
   useLocation,
   Outlet,
+  useNavigate,
 } from "react-router-dom";
 import { StaticRouter } from "react-router-dom/server";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const sections = [
   {
@@ -56,25 +57,37 @@ type ShopSections = {
 const useRouteMatch = (patterns) => {
   const { pathname } = useLocation();
 
-  for (let i = 0; i < patterns.length; i += 1) {
+  let possibleMatches;
+  for (let i = 0; i < patterns.length; i++) {
     const pattern = patterns[i];
-    const possibleMatch = matchPath(pattern, pathname);
-    if (possibleMatch !== null) {
-      return { id: i, routeMatch: possibleMatch };
+    // const possibleMatch = matchPath(pattern, pathname);
+    const possibleMatch = pathname.startsWith(pattern);
+    if (possibleMatch) {
+      if (i > 0) {
+        if (
+          possibleMatches &&
+          possibleMatches.pattern.length < pattern.length
+        ) {
+          possibleMatches = { id: i, routeMatch: possibleMatch, pattern };
+        }
+      } else {
+        possibleMatches = { id: i, routeMatch: possibleMatch, pattern };
+      }
     }
+  }
+
+  if (possibleMatches) {
+    return possibleMatches;
   }
 
   return null;
 };
 
-const MyTabs: React.FC<{
+type TablinksProps = {
   sections: ShopSections[];
-}> = ({ sections }) => {
-  // You need to provide the routes in descendant order.
-  // This means that if you have nested routes like:
-  // users, users/new, users/edit.
-  // Then the order should be ['users/add', 'users/edit', 'users'].
-  // const routeMatch = useRouteMatch(["/inbox/:id", "/drafts", "/trash"]);
+};
+
+const TabLinks: React.FC<TablinksProps> = ({ sections }) => {
   const routeMatch = useRouteMatch(
     sections.map((section, ind) => {
       if (section.to) {
@@ -114,65 +127,45 @@ const MyTabs: React.FC<{
     </Box>
   );
 };
-
-const TabsRoute: React.FC<{ sections: ShopSections[] }> = ({ sections }) => {
-  return (
-    <BoxMUI sx={{ width: "100%" }}>
-      <MyTabs sections={sections} />
-      {/* <Routes>
-        {sections.map((section, ind) => {
-          return (
-            <Route
-              key={`tab-route-${ind}`}
-              path={section.to}
-              element={section.content}
-            />
-          );
-        })}
-      </Routes> */}
-    </BoxMUI>
-  );
-};
 // ----------------------------------------------------------------
 
 type Props = {};
 
 const Shop: React.FC<Props> = ({ children }) => {
-  return (
-    <>
-      <TabsRoute sections={sections} />
-      <Outlet />
-    </>
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const routeMatch = useRouteMatch(
+    sections.map((section, ind) => {
+      if (section.to) {
+        return section.to;
+      }
+    })
   );
-  // return (
-  //   <BaseProfilePage
-  //     title="Shop"
-  //     sections={[
-  //       {
-  //         title: "Orders",
-  //         content: <OrderList seller />,
-  //         icon: Icons.shoppingcart,
-  //       },
-  //       {
-  //         title: "Products",
-  //         content: <ProductSetup />,
-  //         icon: Icons.store,
-  //       },
-  //       {
-  //         title: "Setup",
-  //         content: <ShopSetup />,
-  //         icon: Icons.store,
-  //       },
-  //       {
-  //         title: "Banking Details",
-  //         content: <Box></Box>,
-  //         icon: Icons.dollar,
-  //       },
-  //     ]}
-  //   >
-  //     <Box>Shop</Box>
-  //   </BaseProfilePage>
-  // );
+
+  return (
+    <BaseProfilePage
+      title="Shop"
+      actions={
+        routeMatch && routeMatch.pattern.length < pathname.length // if the current path is a sub-route of routeMatch
+          ? [
+              {
+                title: `Back to ${sections[routeMatch.id].title}`,
+                action: () => {
+                  navigate(sections[routeMatch.id].to);
+                },
+              },
+            ]
+          : []
+      }
+    >
+      <BoxMUI sx={{ width: "100%" }}>
+        <TabLinks sections={sections} />
+      </BoxMUI>
+
+      {/* Render child routes components */}
+      <Outlet />
+    </BaseProfilePage>
+  );
 };
 
 export default Shop;

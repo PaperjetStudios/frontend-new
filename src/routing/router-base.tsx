@@ -53,7 +53,10 @@ const BaseRoutes: React.FC = () => {
         <Route path="shop" element={<Shop />}>
           <Route index element={<OrderList seller />} />
           <Route path="setup" element={<ShopSetup />} />
-          <Route path="products" element={<ProductSetup />} />
+          <Route path="products" element={<ProductSetup />}>
+            <Route index element={<ProductSetup />} />
+            <Route path=":slug" element={<ProductSetup />} />
+          </Route>
           <Route path="banking_details" element={<Box />} />
         </Route>
       </Route>

@@ -14,6 +14,8 @@ type Props = {
   categorySlug?: string;
   tagsSlug?: string;
   storeSlug?: string;
+  userID?: string | number;
+  seller?: boolean;
 };
 
 const ProductCardList: React.FC<Props> = ({
@@ -22,6 +24,8 @@ const ProductCardList: React.FC<Props> = ({
   categorySlug = "",
   tagsSlug = "",
   storeSlug = "",
+  userID = "",
+  seller = false,
 }) => {
   const [currentPage, setCurrentPage] = React.useState(page);
 
@@ -30,7 +34,7 @@ const ProductCardList: React.FC<Props> = ({
   };
 
   const { loading, data } = useQuery(
-    paginated_products(categorySlug, storeSlug, tagsSlug),
+    paginated_products(categorySlug, storeSlug, tagsSlug, userID),
     {
       variables: {
         pageSize: pageSize,
@@ -55,7 +59,7 @@ const ProductCardList: React.FC<Props> = ({
         {data.products.data.map((obj: any, ind: number) => {
           return (
             <Grid key={`prod_${ind}`} item xs={6} md={2}>
-              <ProductCard id={obj.id} />
+              <ProductCard id={obj.id} seller={seller} />
             </Grid>
           );
         })}

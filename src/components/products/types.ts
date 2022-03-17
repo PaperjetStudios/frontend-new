@@ -22,42 +22,14 @@ export type Product = {
         };
       };
     };
-    Featured_Image: {
-      data: {
-        attributes: {
-          url: string;
-        };
-      };
-    };
-    Gallery: {
-      data: {
-        attributes: {
-          url: string;
-        };
-      }[];
-    };
-    Tags: {
-      data: {
-        id: string;
-        attributes: {
-          Title: string;
-          slug: string;
-        };
-      }[];
-    };
+    Featured_Image: any;
+    Gallery: any;
+    Tags: any;
+    Categories: any;
     Reviews: {
       data: {
         attributes: Review[];
       };
-    };
-    Categories: {
-      data: {
-        id: string | number;
-        attributes: {
-          Title: string;
-          slug: string;
-        };
-      }[];
     };
   };
 };

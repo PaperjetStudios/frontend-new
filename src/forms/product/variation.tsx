@@ -86,8 +86,8 @@ const ProductVariation: React.FC<Props> = ({
                   ) {
                     return (
                       <Box
+                        key={`variation-${name}-${ind}`}
                         className="relative px-8 pt-5 pb-2 border-grey border rounded-sm"
-                        key={variation.id}
                       >
                         {ind > 0 && (
                           <Button

@@ -70,7 +70,11 @@ const BaseProfilePage: React.FC<Props> = ({
           {actions.length > 0 &&
             actions.map((act, ind) => {
               return (
-                <Button onClick={act.action} variant="contained">
+                <Button
+                  key={`base-profile-page-${title}-action-${act?.title}-${ind}`}
+                  onClick={act.action}
+                  variant="contained"
+                >
                   {act.title}
                 </Button>
               );
