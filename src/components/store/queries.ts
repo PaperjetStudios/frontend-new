@@ -29,6 +29,11 @@ export const BASE_STORE = gql`
           Title
           Description
           Cost
+          delivery_options {
+            id
+            Description
+            Cost
+          }
           Logo {
             data {
               attributes {

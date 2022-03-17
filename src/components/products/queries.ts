@@ -26,6 +26,20 @@ export const BASE_PRODUCT = gql`
               id
               attributes {
                 Title
+                Description
+                Cost
+                delivery_options {
+                  id
+                  Description
+                  Cost
+                }
+                Logo {
+                  data {
+                    attributes {
+                      url
+                    }
+                  }
+                }
               }
             }
           }
@@ -87,7 +101,6 @@ export const single_product_by_id = gql`
     }
   }
 `;
-
 export const paginated_products = (
   categorySlug: string,
   storeSlug: string,
@@ -112,13 +125,6 @@ export const paginated_products = (
   if (condition !== "" && condition !== "Any") {
     filters += `Condition:{contains:"${condition}"}`;
   }
-
-  // if ( price !== 0 ) {
-  //    filters+= '';
-  // }
-
-  // Sorting
-  // let sort = '';
 
   return gql`
   query (

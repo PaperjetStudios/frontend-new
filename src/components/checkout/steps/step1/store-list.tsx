@@ -19,6 +19,11 @@ import CartPreviewItem from "../../../cart/cart-preview-item";
 import { CartItem } from "../../../cart/types";
 import { useState } from "react";
 import { moneyFormatter } from "../../../../config/util";
+import { Box } from "@mui/system";
+import DeliveryMethod from "./delivery-method";
+import DeliveryMethodElement from "./delivery-method";
+import PepWidget from "./pep";
+import _ from "lodash";
 
 export type StoreListProps = {
   storeList: CartItem[];
@@ -46,16 +51,22 @@ const StoreList: React.FC<StoreListProps> = ({ storeList, storeId }) => {
     return <Loader />;
   }
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue((event.target as HTMLInputElement).value);
-  };
-
-  console.log(storeData);
+  // sort by overall costing
+  const sortedDeliveryMethods = _.sortBy(
+    storeData.DeliveryMethods.data,
+    (obj) => {
+      return obj.attributes.Cost;
+    }
+  );
 
   return (
     <Stack
       spacing={3}
-      sx={{ border: `1px solid ${colors["grey-light"]}`, p: 3 }}
+      sx={{
+        border: `1px solid ${colors["grey-light"]}`,
+
+        p: 3,
+      }}
     >
       <Typography variant="small2">From {storeData.Title}:</Typography>
       {storeList.map((obj: CartItem, ind: number) => {
@@ -67,31 +78,20 @@ const StoreList: React.FC<StoreListProps> = ({ storeList, storeId }) => {
           />
         );
       })}
-      <Stack>
-        <FormControl>
-          <FormLabel id={`deliveryMethod-${storeData.Title}`}>
-            Delivery Method
-          </FormLabel>
-          <RadioGroup
-            aria-labelledby={`deliveryMethod-${storeData.Title}`}
-            name="controlled-radio-buttons-group"
-            value={value}
-            onChange={handleChange}
-          >
-            {storeData.DeliveryMethods.data.map((obj) => {
-              return (
-                <FormControlLabel
-                  value={obj.id}
-                  control={<Radio />}
-                  label={`${obj.attributes.Title} (${moneyFormatter(
-                    obj.attributes.Cost
-                  )})`}
-                />
-              );
-            })}
-          </RadioGroup>
-        </FormControl>
-      </Stack>
+      <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+        <Stack direction="row" spacing={2}>
+          {sortedDeliveryMethods.map((obj) => {
+            return (
+              <DeliveryMethodElement
+                storeId={storeId}
+                id={obj.id}
+                {...obj.attributes}
+                key={obj.id}
+              />
+            );
+          })}
+        </Stack>
+      </Box>
     </Stack>
   );
 };

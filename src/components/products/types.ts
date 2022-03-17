@@ -1,4 +1,5 @@
 import { Review } from "../reviews/types";
+import { DeliveryMethod } from "../store/types";
 
 export type Product = {
   id: string | number;
@@ -19,6 +20,12 @@ export type Product = {
         attributes: {
           Title: string;
           slug: string;
+          DeliveryMethods: {
+            data: {
+              id: number | string;
+              attributes: DeliveryMethod;
+            }[];
+          };
         };
       };
     };

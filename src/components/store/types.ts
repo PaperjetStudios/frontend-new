@@ -26,11 +26,18 @@ export type StoreData = {
     }[];
   };
 };
+export type DeliveryMethodOption = {
+  id: string | number;
+  Cost: number;
+  Description: string;
+};
 export type DeliveryMethod = {
+  id: string | number;
   Title: string;
   Description: string;
   Cost: string;
   Logo: EcomImage;
+  delivery_options: DeliveryMethodOption[];
 };
 
 export type StoreAddress = {

@@ -98,6 +98,13 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          fontSize: "13px",
+        },
+      },
+    },
     MuiButtonBase: {
       defaultProps: {
         disableRipple: true, // No more ripple!

@@ -1,4 +1,4 @@
-import { Box, Stack, Step, StepLabel, Stepper } from "@mui/material";
+import { Box, Grid, Stack, Step, StepLabel, Stepper } from "@mui/material";
 
 import { useWizard } from "react-use-wizard";
 
@@ -9,6 +9,8 @@ type StepProps = {
   handleCurrentStep: () => Promise<boolean>;
   stepSetup: StepSetup;
   unlocked: number;
+  hideFooter?: boolean;
+  sidebar?: React.ReactElement;
 };
 
 export const StepBox: React.FC<StepProps> = ({
@@ -16,6 +18,8 @@ export const StepBox: React.FC<StepProps> = ({
   stepSetup,
   unlocked,
   children,
+  hideFooter = true,
+  sidebar = null,
 }) => {
   const {
     handleStep,
@@ -51,13 +55,40 @@ export const StepBox: React.FC<StepProps> = ({
           </Step>
         ))}
       </Stepper>
-      <Box>{children}</Box>
       <Box>
-        {!isFirstStep && (
-          <button onClick={() => previousStep()}>Previous</button>
+        {sidebar ? (
+          <Grid
+            container
+            spacing={{
+              xs: 2,
+              md: 4,
+              xl: 5,
+            }}
+            justifyContent="flex-start"
+            sx={{
+              pt: 4,
+              pb: 3,
+            }}
+          >
+            <Grid item sm={12} md={9} sx={{ pt: { xs: 5, md: 2 } }}>
+              {children}
+            </Grid>
+            <Grid item sm={12} md={3} sx={{ position: "relative" }}>
+              {sidebar}
+            </Grid>
+          </Grid>
+        ) : (
+          { children }
         )}
-        {!isLastStep && <button onClick={() => nextStep()}>Next</button>}
       </Box>
+      {!hideFooter && (
+        <Box>
+          {!isFirstStep && (
+            <button onClick={() => previousStep()}>Previous</button>
+          )}
+          {!isLastStep && <button onClick={() => nextStep()}>Next</button>}
+        </Box>
+      )}
     </Stack>
   );
 };
