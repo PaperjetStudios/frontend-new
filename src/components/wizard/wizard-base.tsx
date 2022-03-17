@@ -44,8 +44,6 @@ export const StepBox: React.FC<StepProps> = ({
           <Step
             key={label}
             onClick={() => {
-              console.log("Unlocked", unlocked);
-              console.log("index", index);
               if (unlocked >= index) {
                 goToStep(index);
               }
@@ -70,10 +68,10 @@ export const StepBox: React.FC<StepProps> = ({
               pb: 3,
             }}
           >
-            <Grid item sm={12} md={9} sx={{ pt: { xs: 5, md: 2 } }}>
+            <Grid item xs={12} md={9} sx={{ pt: { xs: 5, md: 2 } }}>
               {children}
             </Grid>
-            <Grid item sm={12} md={3} sx={{ position: "relative" }}>
+            <Grid item xs={12} md={3} sx={{ position: "relative" }}>
               {sidebar}
             </Grid>
           </Grid>

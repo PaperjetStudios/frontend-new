@@ -5,6 +5,7 @@ import { useWizard } from "react-use-wizard";
 import { moneyFormatter } from "../../../../config/util";
 import { cartState } from "../../../../state/cart";
 import colors from "../../../../theme/colors";
+import ShadowContainer from "../../../common/shadow-container";
 import { Icons } from "../../../icons";
 
 type ListItemProps = {
@@ -47,13 +48,13 @@ const Totals: React.FC = () => {
   const { nextStep } = useWizard();
 
   return (
-    <Box
+    <ShadowContainer
       sx={{
         padding: 2,
         textAlign: "center",
         position: "sticky",
-        top: "0",
-        border: `1px solid ${colors["grey-light"]}`,
+
+        width: "100%",
       }}
     >
       <Typography
@@ -87,7 +88,7 @@ const Totals: React.FC = () => {
       >
         Continue
       </Button>
-    </Box>
+    </ShadowContainer>
   );
 };
 

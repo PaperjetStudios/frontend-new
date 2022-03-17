@@ -19,6 +19,7 @@ export const StepperConnector = styled(StepConnector)(({ theme }) => ({
   [`& .${stepConnectorClasses.line}`]: {
     height: 3,
     border: 0,
+    transition: "0.2s all",
     backgroundColor: colors["grey-light"],
     borderRadius: 1,
   },
@@ -36,6 +37,7 @@ export const StepIconRoot = styled("div")<{
   borderRadius: "50%",
   justifyContent: "center",
   alignItems: "center",
+  transition: "0.2s all",
   ...(ownerState.active && {
     background: colors["darken"],
     boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",

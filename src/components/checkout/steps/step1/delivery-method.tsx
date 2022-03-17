@@ -118,9 +118,12 @@ const DeliveryMethodElement: React.FC<DeliveryMethod & Props> = ({
         sx={{
           borderRadius: "5px",
           border: `1px solid ${
-            isMethodActive ? colors["dark"] : colors["grey-light"]
+            isMethodActive ? colors[""] : colors["grey-light"]
           }`,
-          boxShadow: isMethodActive ? "0 4px 10px rgba(0,0,0,0.1)" : "0",
+          transition: "0.2s all",
+          boxShadow: isMethodActive
+            ? "0 0px 10px rgba(0,0,0,0.08)"
+            : "0 0 0 rgba(0,0,0,0)",
           p: 3,
         }}
       >

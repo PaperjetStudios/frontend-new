@@ -3,6 +3,7 @@ import { useState } from "react";
 import { checkoutState } from "../../../state/checkout";
 import { StepBox } from "../../wizard/wizard-base";
 import { StepElementProps } from "../types";
+import Totals from "./common/totals";
 
 const Step2Info: React.FC<StepElementProps> = ({ setup }) => {
   const [ticked, setTicked] = useState(false);
@@ -30,6 +31,7 @@ const Step2Info: React.FC<StepElementProps> = ({ setup }) => {
       unlocked={checkout.unlockedSteps}
       stepSetup={setup}
       handleCurrentStep={handleCurrentStep}
+      sidebar={<Totals />}
     >
       <Typography variant="h6">Step 2</Typography>
       <button onClick={() => setTicked(!ticked)}>

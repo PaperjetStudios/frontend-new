@@ -24,6 +24,7 @@ import DeliveryMethod from "./delivery-method";
 import DeliveryMethodElement from "./delivery-method";
 import PepWidget from "./pep";
 import _ from "lodash";
+import ShadowContainer from "../../../common/shadow-container";
 
 export type StoreListProps = {
   storeList: CartItem[];
@@ -60,39 +61,34 @@ const StoreList: React.FC<StoreListProps> = ({ storeList, storeId }) => {
   );
 
   return (
-    <Stack
-      spacing={3}
-      sx={{
-        border: `1px solid ${colors["grey-light"]}`,
-
-        p: 3,
-      }}
-    >
-      <Typography variant="small2">From {storeData.Title}:</Typography>
-      {storeList.map((obj: CartItem, ind: number) => {
-        return (
-          <CartPreviewItem
-            {...obj}
-            size="checkout"
-            key={obj.Product.data.attributes.Title}
-          />
-        );
-      })}
-      <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-        <Stack direction="row" spacing={2}>
-          {sortedDeliveryMethods.map((obj) => {
-            return (
-              <DeliveryMethodElement
-                storeId={storeId}
-                id={obj.id}
-                {...obj.attributes}
-                key={obj.id}
-              />
-            );
-          })}
-        </Stack>
-      </Box>
-    </Stack>
+    <ShadowContainer sx={{ p: 3 }}>
+      <Stack spacing={3}>
+        <Typography variant="small2">From {storeData.Title}:</Typography>
+        {storeList.map((obj: CartItem, ind: number) => {
+          return (
+            <CartPreviewItem
+              {...obj}
+              size="checkout"
+              key={obj.Product.data.attributes.Title}
+            />
+          );
+        })}
+        <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+          <Stack sx={{ gap: 2, flexDirection: ["column", "column", "row"] }}>
+            {sortedDeliveryMethods.map((obj) => {
+              return (
+                <DeliveryMethodElement
+                  storeId={storeId}
+                  id={obj.id}
+                  {...obj.attributes}
+                  key={obj.id}
+                />
+              );
+            })}
+          </Stack>
+        </Box>
+      </Stack>
+    </ShadowContainer>
   );
 };
 
