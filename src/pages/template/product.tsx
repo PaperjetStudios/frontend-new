@@ -54,8 +54,7 @@ const Product: React.FC<Props> = ({ children }) => {
 		return <Loader />;
 	}
 
-	const { Title, Rating, Reviews, Description, Variation, Categories } =
-		data.product.data.attributes;
+	const { Title, Rating, Reviews, Description, Variation, Categories, On_Sale } = data.product.data.attributes;
 
 	return (
 		<LayoutContainer>
@@ -79,10 +78,28 @@ const Product: React.FC<Props> = ({ children }) => {
 								{Description}
 							</Typography>
 						</Box>
-						<Box>
-							<Typography variant='h6'>
+						<Box sx={{ display: 'flex', gap: 0.75 }}>
+							<Typography
+								gutterBottom
+								variant='h6'
+								component='div'
+								sx={{
+									fontWeight: 500,
+									textDecoration: On_Sale ? 'line-through' : 'none',
+								}}>
 								{moneyFormatter(Variation[0].Price)}
 							</Typography>
+							{On_Sale && (
+								<Typography
+									gutterBottom
+									variant='h6'
+									component='div'
+									sx={{
+										fontWeight: 500,
+									}}>
+									{moneyFormatter(Variation[0].Sale_Price)}
+								</Typography>
+							)}
 						</Box>
 						<Grid
 							container
@@ -114,9 +131,7 @@ const Product: React.FC<Props> = ({ children }) => {
 										}
 									}}>
 									<Box sx={{ mr: 1 }}>{Icons.shoppingcart}</Box>
-									Add to Cart{' '}
-									{cartLoading ||
-										(typeof updateCart === 'boolean' && <Loader />)}
+									Add to Cart {cartLoading || (typeof updateCart === 'boolean' && <Loader />)}
 								</Button>
 							</Grid>
 							<Grid item xs={3} lg={1} xl={3}>
@@ -124,10 +139,7 @@ const Product: React.FC<Props> = ({ children }) => {
 							</Grid>
 						</Grid>
 						<Stack spacing={1.25}>
-							<Typography variant='body2'>
-								Availability:{' '}
-								{!Variation[0].Quantity ? 'Out of Stock' : 'In Stock'}
-							</Typography>
+							<Typography variant='body2'>Availability: {!Variation[0].Quantity ? 'Out of Stock' : 'In Stock'}</Typography>
 							<Typography variant='body2'>SKU: {Variation[0].SKU}</Typography>
 							<Typography variant='body2'>
 								Categories:{' '}
@@ -136,9 +148,7 @@ const Product: React.FC<Props> = ({ children }) => {
 										<>
 											{index !== 0 && ', '}
 											<Link to={createCategoryLink(obj.attributes.slug)}>
-												<Typography variant='body2'>
-													{obj.attributes.Title}
-												</Typography>
+												<Typography variant='body2'>{obj.attributes.Title}</Typography>
 											</Link>
 										</>
 									);
@@ -148,12 +158,7 @@ const Product: React.FC<Props> = ({ children }) => {
 								<Typography sx={{ mr: 1 }} variant='body2'>
 									Share On:{' '}
 								</Typography>
-								<SocialShare
-									providers={[
-										{ provider: 'facebook' },
-										{ provider: 'twitter' },
-									]}
-								/>
+								<SocialShare providers={[{ provider: 'facebook' }, { provider: 'twitter' }]} />
 							</Box>
 							<Box sx={{ pt: 0.75 }}>
 								<Button color='secondary' variant='contained'>
@@ -168,9 +173,7 @@ const Product: React.FC<Props> = ({ children }) => {
 						tabs={[
 							{
 								title: 'Description',
-								content: (
-									<Typography variant='subtitle2'>{Description}</Typography>
-								),
+								content: <Typography variant='subtitle2'>{Description}</Typography>,
 							},
 							{
 								title: `Reviews (${Reviews.data.length})`,
@@ -178,9 +181,7 @@ const Product: React.FC<Props> = ({ children }) => {
 							},
 							{
 								title: 'Additional information',
-								content: (
-									<Typography variant='subtitle2'>{Description}</Typography>
-								),
+								content: <Typography variant='subtitle2'>{Description}</Typography>,
 							},
 						]}
 					/>

@@ -67,11 +67,7 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 		return <Skeleton variant='rectangular' width={270} height={270} />;
 	}
 
-	const { Title, slug, Featured_Image, Variation } =
-		data?.product?.data?.attributes;
-
-	// emulating sale styles to test layout - can't add this in Strapi
-	const Sale_Price = 80;
+	const { Title, slug, Featured_Image, Variation, On_Sale } = data?.product?.data?.attributes;
 
 	return (
 		<CustomizedCard>
@@ -88,7 +84,7 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 						display: 'flex',
 						position: 'absolute',
 					}}>
-					{Sale_Price > 0 && (
+					{On_Sale && (
 						<Typography
 							variant='body3'
 							sx={{
@@ -101,13 +97,8 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 							SALE
 						</Typography>
 					)}
-					<Box
-						className='wishlist-icon-card'
-						sx={{ position: 'absolute', right: '17px', opacity: 0 }}>
-						<Button
-							sx={{ padding: 0, width: 'auto', fontSize: 20, minWidth: 20 }}>
-							{Icons.heart}
-						</Button>
+					<Box className='wishlist-icon-card' sx={{ position: 'absolute', right: '17px', opacity: 0 }}>
+						<Button sx={{ padding: 0, width: 'auto', fontSize: 20, minWidth: 20 }}>{Icons.heart}</Button>
 					</Box>
 				</Box>
 				<CardMedia
@@ -126,30 +117,29 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 						{Title}
 					</Typography>
 					<Box sx={{ display: 'flex', gap: 0.75 }}>
-						{Sale_Price > 0 && (
-							<Typography
-								gutterBottom
-								variant='body3'
-								component='div'
-								sx={{
-									fontWeight: 500,
-									textDecoration: 'line-through',
-									color: colors['grey-dark'],
-								}}>
-								{moneyFormatter(Sale_Price)}
-							</Typography>
-						)}
-
 						<Typography
 							gutterBottom
 							variant='body3'
 							component='div'
 							sx={{
-								color: colors['grey-dark'],
 								fontWeight: 500,
+								textDecoration: On_Sale ? 'line-through' : 'none',
+								color: colors['grey-dark'],
 							}}>
 							{moneyFormatter(Variation[0].Price)}
 						</Typography>
+						{On_Sale && (
+							<Typography
+								gutterBottom
+								variant='body3'
+								component='div'
+								sx={{
+									color: colors['grey-dark'],
+									fontWeight: 500,
+								}}>
+								{moneyFormatter(Variation[0].Sale_Price)}
+							</Typography>
+						)}
 					</Box>
 				</CardContent>
 			</CardActionArea>

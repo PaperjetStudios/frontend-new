@@ -10,10 +10,12 @@ export const BASE_PRODUCT = gql`
 		Description
 		slug
 		Rating
+		On_Sale
 		Variation {
 			Quantity
 			SKU
 			Price
+			Sale_Price
 		}
 		Store {
 			data {
@@ -80,12 +82,7 @@ export const single_product_by_id = gql`
 	}
 `;
 
-export const paginated_products = (
-	categorySlug: string,
-	storeSlug: string,
-	tagSlug: string,
-	condition: string
-) => {
+export const paginated_products = (categorySlug: string, storeSlug: string, tagSlug: string, condition: string) => {
 	//BUILD FILTERS
 	let filters = '';
 
