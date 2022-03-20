@@ -1,5 +1,6 @@
 import { ApolloError, gql, useMutation, useQuery } from '@apollo/client';
 import { Button, Grid, Box, Stack, Typography } from '@mui/material';
+import { default as MUIRating } from '@mui/material/Rating';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PJSTabs from '../../components/tabs';
@@ -16,12 +17,12 @@ import SocialShare from '../../components/products/share';
 import ReviewBase from '../../components/reviews/review-base';
 import { createCategoryLink } from '../../config/config';
 import { moneyFormatter } from '../../config/util';
+import ProductCardList from '../../components/products/list';
 
 type Props = {};
 
 const Product: React.FC<Props> = ({ children }) => {
 	const { product } = useParams();
-
 	const { update: updateCart, loading: cartLoading } = useCart();
 
 	const [quantity, setQuantity] = useState<number>(1);
@@ -54,7 +55,7 @@ const Product: React.FC<Props> = ({ children }) => {
 		return <Loader />;
 	}
 
-	const { Title, Rating, Reviews, Description, Variation, Categories, On_Sale } = data.product.data.attributes;
+	const { Title, Reviews, Description, Variation, Categories, Tags, On_Sale, Store } = data.product.data.attributes;
 
 	return (
 		<LayoutContainer>
@@ -65,10 +66,9 @@ const Product: React.FC<Props> = ({ children }) => {
 				<Grid sm={12} md={6} sx={{ pt: { xs: 5, md: 0 } }}>
 					<Box sx={{ ml: { md: 10 } }}>
 						<Typography variant='h5'>{Title}</Typography>
-						<ReviewBase reviews={Reviews.data} rating={Rating} />
+						<MUIRating value={4} size='small' sx={{ pt: 2, pb: 1.4 }} readOnly />
 						<Box
 							sx={{
-								mt: 3,
 								mb: 4,
 								pb: 5,
 								borderBottom: 1,
@@ -112,10 +112,10 @@ const Product: React.FC<Props> = ({ children }) => {
 								py: 4,
 								my: 5,
 							}}>
-							<Grid item xs={12} lg={4} xl={3}>
+							<Grid item>
 								<Quantity value={quantity} setValue={setQuantity} max={5} />
 							</Grid>
-							<Grid item xs={12} lg={4} xl={3}>
+							<Grid item>
 								<Button
 									variant='contained'
 									disabled={Variation[0].Quantity === 0}
@@ -134,7 +134,7 @@ const Product: React.FC<Props> = ({ children }) => {
 									Add to Cart {cartLoading || (typeof updateCart === 'boolean' && <Loader />)}
 								</Button>
 							</Grid>
-							<Grid item xs={3} lg={1} xl={3}>
+							<Grid item>
 								<Button variant='iconBox'>{Icons.heart}</Button>
 							</Grid>
 						</Grid>
@@ -177,7 +177,8 @@ const Product: React.FC<Props> = ({ children }) => {
 							},
 							{
 								title: `Reviews (${Reviews.data.length})`,
-								content: <ReviewBase reviews={Reviews.data} rating={Rating} />,
+								// content: <ReviewBase reviews={Reviews.data} />,
+								content: <ReviewBase productId={product} />,
 							},
 							{
 								title: 'Additional information',
@@ -185,6 +186,12 @@ const Product: React.FC<Props> = ({ children }) => {
 							},
 						]}
 					/>
+				</Grid>
+				<Grid container sx={{ mt: 10 }}>
+					<Box sx={{ textAlign: 'center', width: '100%', mb: 2 }}>
+						<Typography variant='h4'>More From The Store</Typography>
+					</Box>
+					<ProductCardList storeSlug={Store.data.attributes.slug} page={1} pageSize={4} />
 				</Grid>
 			</Grid>
 		</LayoutContainer>

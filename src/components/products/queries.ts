@@ -91,11 +91,11 @@ export const paginated_products = (categorySlug: string, storeSlug: string, tagS
 	}
 
 	if (storeSlug !== '') {
-		filters += `Store:{slug: {contains:${storeSlug}}}`;
+		filters += `Store:{slug: {contains:"${storeSlug}"}}`;
 	}
 
 	if (tagSlug !== '') {
-		filters += `Tags:{slug: {contains:${tagSlug}}}`;
+		filters += `Tags:{slug: {contains:"${tagSlug}"}}`;
 	}
 
 	if (condition !== '' && condition !== 'Any') {

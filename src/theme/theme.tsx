@@ -99,6 +99,7 @@ const theme = createTheme({
 
 					style: {
 						height: 44,
+						fontSize: 14,
 						borderRadius: 0,
 					},
 				},

@@ -21,6 +21,7 @@ type Props = {
 	storeSlug?: string;
 	condition?: 'Any' | 'New' | 'Used';
 	displayFilterBar?: boolean;
+	displayPagination?: boolean;
 };
 
 const ProductCardList: React.FC<Props> = ({
@@ -31,6 +32,7 @@ const ProductCardList: React.FC<Props> = ({
 	storeSlug = '',
 	condition = '',
 	displayFilterBar = false,
+	displayPagination = false,
 }) => {
 	const location = useLocation();
 	const query = new URLSearchParams(location.search);
@@ -50,21 +52,18 @@ const ProductCardList: React.FC<Props> = ({
 		setProductCondition(event.target.value);
 	};
 
-	const { loading, data } = useQuery(
-		paginated_products(categorySlug, storeSlug, tagsSlug, productCondition),
-		{
-			variables: {
-				pageSize: pageSize,
-				page: currentPage,
-			},
-			onCompleted: (data: any) => {
-				console.log(data);
-			},
-			onError: (error: ApolloError) => {
-				console.log(JSON.stringify(error));
-			},
-		}
-	);
+	const { loading, data } = useQuery(paginated_products(categorySlug, storeSlug, tagsSlug, productCondition), {
+		variables: {
+			pageSize: pageSize,
+			page: currentPage,
+		},
+		onCompleted: (data: any) => {
+			console.log(data);
+		},
+		onError: (error: ApolloError) => {
+			console.log(JSON.stringify(error));
+		},
+	});
 
 	if (loading || data === undefined) {
 		return <Loader />;
@@ -75,10 +74,7 @@ const ProductCardList: React.FC<Props> = ({
 			{displayFilterBar && (
 				// Conditionally load the filter bar so this component can be re-used for the "Related Products" etc on Product pages
 				<Box sx={{ justifyContent: 'flex-end', display: 'flex', my: 7 }}>
-					<ProductFilter
-						filter={productCondition}
-						onChangeValue={handleFilterChange}
-					/>
+					<ProductFilter filter={productCondition} onChangeValue={handleFilterChange} />
 				</Box>
 			)}
 			<Grid
@@ -102,7 +98,7 @@ const ProductCardList: React.FC<Props> = ({
 				})}
 			</Grid>
 
-			{data.products.meta.pagination.pageCount !== 1 && (
+			{data.products.meta.pagination.pageCount !== 1 && displayPagination && (
 				<PJSPagination count={data.products.meta.pagination.pageCount} />
 			)}
 		</>

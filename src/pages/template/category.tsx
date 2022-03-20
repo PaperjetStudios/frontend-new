@@ -9,12 +9,7 @@ const Category: React.FC<Props> = ({ children }) => {
 
 	return (
 		<LayoutContainer>
-			<ProductCardList
-				categorySlug={cat}
-				page={1}
-				pageSize={5}
-				displayFilterBar={true}
-			/>
+			<ProductCardList categorySlug={cat} page={1} pageSize={5} displayFilterBar={true} displayPagination={true} />
 		</LayoutContainer>
 	);
 };

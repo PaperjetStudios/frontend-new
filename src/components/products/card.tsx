@@ -2,7 +2,6 @@ import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import { Icons } from '../icons';
 import { styled } from '@mui/material/styles';
@@ -15,8 +14,6 @@ import { createProductLink, currentApi } from '../../config/config';
 import colors from '../../theme/colors';
 import { moneyFormatter } from '../../config/util';
 import { useNavigate } from 'react-router-dom';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 type Props = {
 	id: number;

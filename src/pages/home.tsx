@@ -9,7 +9,7 @@ type Props = {};
 const Homepage: React.FC<Props> = ({ children }) => (
 	<BasePage slug='home'>
 		<LayoutContainer>
-			<ProductCardList page={1} pageSize={4} />
+			<ProductCardList page={1} pageSize={4} displayPagination={true} />
 			{children}
 		</LayoutContainer>
 	</BasePage>

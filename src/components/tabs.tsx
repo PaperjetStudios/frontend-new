@@ -47,14 +47,9 @@ function TabPanel(props: TabPanelProps) {
 	const { children, value, index, ...other } = props;
 
 	return (
-		<div
-			role='tabpanel'
-			hidden={value !== index}
-			id={`tabpanel-${index}`}
-			aria-labelledby={`tab-${index}`}
-			{...other}>
+		<div role='tabpanel' hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`} {...other}>
 			{value === index && (
-				<Box sx={{ mt: 3, maxWidth: 900 }}>
+				<Box sx={{ mt: 6, maxWidth: 900 }}>
 					<Typography>{children}</Typography>
 				</Box>
 			)}
@@ -87,10 +82,7 @@ const PJSTabs: React.FC<TabsProps> = ({ tabs, defaultTab = 0 }) => {
 	return (
 		<Box>
 			<Box>
-				<CustomizedTabs
-					value={currentTab}
-					onChange={handleChange}
-					aria-label='tabs'>
+				<CustomizedTabs value={currentTab} onChange={handleChange} aria-label='tabs'>
 					{tabs.map((tab, index) => {
 						return (
 							<Tab

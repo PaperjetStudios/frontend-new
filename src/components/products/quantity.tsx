@@ -11,7 +11,7 @@ type Props = {
 };
 
 const CustomizedButton = styled(Button)`
-	height: 44px;
+	height: 42px;
 	color: ${colors['grey-medium']};
 	:hover {
 		color: ${colors['dark']};
