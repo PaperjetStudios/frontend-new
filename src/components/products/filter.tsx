@@ -1,41 +1,63 @@
 import React from 'react';
+import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
+import colors from '../../theme/colors';
 
 type Props = {
-	filter: string;
+	filter: {
+		condition: string;
+		sale: string;
+	};
 	onChangeValue: (data: any) => void;
 };
 
-// Going to use an unstyled component instead of the customisations below
+const CustomizedSelect = styled(Select)`
+	height: 38px;
 
-// const CustomizedFormControl = styled(FormControl)``;
+	.MuiOutlinedInput-notchedOutline {
+		border-width: 1.5px;
+		border-color: ${colors['grey-lighter']};
+	}
+`;
 
-// const CustomizedMenuItem = styled(MenuItem)``;
+const CustomizedInputLabel = styled(InputLabel)`
+	top: 0px;
+	font-weight: 500;
+	&.Mui-focused {
+		top: 0px;
+	}
+`;
 
-// const CustomizedSelect = styled(Select)``;
+//
 
-// Using this as an example of filtering until I can edit the models in Strapi
-
-const ProductFilter: React.FC<Props> = ({ filter, onChangeValue }) => {
+export const ProductFilter: React.FC<Props> = ({ filter, onChangeValue }) => {
 	return (
-		<FormControl sx={{ m: 1, minWidth: 120 }}>
-			<InputLabel>Condition</InputLabel>
-			<Select
-				value={filter}
-				onChange={onChangeValue}
-				displayEmpty
-				label='Condition'>
-				<MenuItem value='Any'>
-					<em>Condition (Any)</em>
-				</MenuItem>
-				<MenuItem value={'New'}>Condition (New)</MenuItem>
-				<MenuItem value={'Used'}>Condition (Used)</MenuItem>
-			</Select>
-		</FormControl>
+		<Grid>
+			<FormControl sx={{ m: 1, minWidth: 120 }}>
+				<CustomizedInputLabel>Sale</CustomizedInputLabel>
+				<CustomizedSelect name='sale' value={filter.sale} onChange={onChangeValue} displayEmpty label='Sale'>
+					<MenuItem value='Any'>
+						<em>Show All</em>
+					</MenuItem>
+					<MenuItem value={'true'}>On Sale</MenuItem>
+					<MenuItem value={'false'}>Not on Sale</MenuItem>
+				</CustomizedSelect>
+			</FormControl>
+			<FormControl sx={{ m: 1, minWidth: 120 }}>
+				<CustomizedInputLabel>Condition</CustomizedInputLabel>
+				<CustomizedSelect name='condition' value={filter.condition} onChange={onChangeValue} displayEmpty label='Condition'>
+					<MenuItem value='Any'>
+						<em>Condition (Any)</em>
+					</MenuItem>
+					<MenuItem value={'New'}>Condition (New)</MenuItem>
+					<MenuItem value={'Used'}>Condition (Used)</MenuItem>
+				</CustomizedSelect>
+			</FormControl>
+		</Grid>
 	);
 };
 

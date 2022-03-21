@@ -13,11 +13,17 @@ import Loader from '../../components/loader';
 import { ProductGallery } from '../../components/products/gallery';
 import Quantity from '../../components/products/quantity';
 import { BASE_PRODUCT } from '../../components/products/queries';
+import { single_product_by_slug } from '../../components/products/queries';
 import SocialShare from '../../components/products/share';
 import ReviewBase from '../../components/reviews/review-base';
 import { createCategoryLink } from '../../config/config';
 import { moneyFormatter } from '../../config/util';
 import ProductCardList from '../../components/products/list';
+/**
+ * Need a custom query to query Product by slug, currently only allows querying by ID
+ * Querying by Products returns a collection which causes an error in the cart because data returns an array instead of an object
+ * Below will have to be refactored -> single_product_by_slug pulls all ...BASE_PRODUCT data for now
+ */
 
 type Props = {};
 
@@ -26,6 +32,19 @@ const Product: React.FC<Props> = ({ children }) => {
 	const { update: updateCart, loading: cartLoading } = useCart();
 
 	const [quantity, setQuantity] = useState<number>(1);
+
+	let productId = undefined;
+
+	const productBySlug = useQuery(single_product_by_slug, {
+		variables: {
+			slug: product,
+		},
+		onError: (error: ApolloError) => {
+			console.log(JSON.stringify(error));
+		},
+	});
+
+	productId = productBySlug.data?.products?.data[0]?.id;
 
 	const { loading, data } = useQuery(
 		gql`
@@ -43,7 +62,7 @@ const Product: React.FC<Props> = ({ children }) => {
 		`,
 		{
 			variables: {
-				id: product,
+				id: productId,
 			},
 			onError: (error: ApolloError) => {
 				console.log(JSON.stringify(error));
@@ -51,19 +70,20 @@ const Product: React.FC<Props> = ({ children }) => {
 		}
 	);
 
-	if (loading) {
+	if (loading || data === undefined) {
 		return <Loader />;
 	}
 
-	const { Title, Reviews, Description, Variation, Categories, Tags, On_Sale, Store } = data.product.data.attributes;
+	const { Title, Reviews, Description, Variation, Categories, Tags, On_Sale, Store, Additional_Information } =
+		data?.product?.data?.attributes;
 
 	return (
 		<LayoutContainer>
 			<Grid container sx={{ pt: 10 }}>
-				<Grid sm={12} md={6}>
-					<ProductGallery product={data.product.data} />
+				<Grid item sm={12} md={6}>
+					<ProductGallery product={data?.product?.data} />
 				</Grid>
-				<Grid sm={12} md={6} sx={{ pt: { xs: 5, md: 0 } }}>
+				<Grid item sm={12} md={6} sx={{ pt: { xs: 5, md: 0 } }}>
 					<Box sx={{ ml: { md: 10 } }}>
 						<Typography variant='h5'>{Title}</Typography>
 						<MUIRating value={4} size='small' sx={{ pt: 2, pb: 1.4 }} readOnly />
@@ -123,7 +143,8 @@ const Product: React.FC<Props> = ({ children }) => {
 										if (typeof updateCart !== 'boolean' && !cartLoading) {
 											updateCart([
 												{
-													Product: data.product,
+													Product: data?.product,
+													// Product: data.products.data[0],
 													Quantity: quantity,
 													Extra: null,
 												},
@@ -141,16 +162,18 @@ const Product: React.FC<Props> = ({ children }) => {
 						<Stack spacing={1.25}>
 							<Typography variant='body2'>Availability: {!Variation[0].Quantity ? 'Out of Stock' : 'In Stock'}</Typography>
 							<Typography variant='body2'>SKU: {Variation[0].SKU}</Typography>
-							<Typography variant='body2'>
-								Categories:{' '}
+							<Typography sx={{ display: 'flex' }} variant='body2'>
+								<Typography sx={{ mr: 0.5 }} variant='body2'>
+									Categories:
+								</Typography>
 								{Categories.data.map((obj: Category, index: number) => {
 									return (
-										<>
+										<Box key={`category_link_${index}`}>
 											{index !== 0 && ', '}
 											<Link to={createCategoryLink(obj.attributes.slug)}>
 												<Typography variant='body2'>{obj.attributes.Title}</Typography>
 											</Link>
-										</>
+										</Box>
 									);
 								})}
 							</Typography>
@@ -178,11 +201,11 @@ const Product: React.FC<Props> = ({ children }) => {
 							{
 								title: `Reviews (${Reviews.data.length})`,
 								// content: <ReviewBase reviews={Reviews.data} />,
-								content: <ReviewBase productId={product} />,
+								content: <ReviewBase productSlug={product} />,
 							},
 							{
 								title: 'Additional information',
-								content: <Typography variant='subtitle2'>{Description}</Typography>,
+								content: <Typography variant='subtitle2'>{Additional_Information}</Typography>,
 							},
 						]}
 					/>

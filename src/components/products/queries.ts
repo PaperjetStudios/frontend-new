@@ -82,7 +82,27 @@ export const single_product_by_id = gql`
 	}
 `;
 
-export const paginated_products = (categorySlug: string, storeSlug: string, tagSlug: string, condition: string) => {
+export const single_product_by_slug = gql`
+	${BASE_PRODUCT}
+	query ($slug: String) {
+		products(filters: { slug: { contains: $slug } }) {
+			data {
+				id
+				attributes {
+					...BASE_PRODUCT
+				}
+			}
+		}
+	}
+`;
+
+export const paginated_products = (
+	categorySlug: string,
+	storeSlug: string,
+	tagSlug: string,
+	condition: string,
+	onSale: string
+) => {
 	//BUILD FILTERS
 	let filters = '';
 
@@ -102,12 +122,13 @@ export const paginated_products = (categorySlug: string, storeSlug: string, tagS
 		filters += `Condition:{contains:"${condition}"}`;
 	}
 
-	// if ( price !== 0 ) {
-	//    filters+= '';
-	// }
-
-	// Sorting
-	// let sort = '';
+	if (onSale !== '' && onSale !== 'Any') {
+		if (onSale === 'true') {
+			filters += `On_Sale:{eq:true}`;
+		} else if (onSale === 'false') {
+			filters += `On_Sale:{eq:false}`;
+		}
+	}
 
 	return gql`
   query (
@@ -130,6 +151,9 @@ export const paginated_products = (categorySlug: string, storeSlug: string, tagS
       }
       data {
         id
+        attributes {
+           slug
+        }
       }
     }
   }

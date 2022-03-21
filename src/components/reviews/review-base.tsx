@@ -8,18 +8,18 @@ import ReviewSummary from './summary';
 type Props = {
 	page?: number;
 	pageSize?: number;
-	productId?: string;
+	productSlug?: string;
 	storeSlug?: string;
 };
 
-const ReviewBase: React.FC<Props> = ({ page = 1, pageSize = 5, productId = '', storeSlug = '' }) => {
+const ReviewBase: React.FC<Props> = ({ page = 1, pageSize = 5, productSlug = '', storeSlug = '' }) => {
 	const [currentPage, setCurrentPage] = React.useState(page);
 
 	const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
 		setCurrentPage(value);
 	};
 
-	const { loading, data } = useQuery(paginated_reviews(productId, storeSlug), {
+	const { loading, data } = useQuery(paginated_reviews(productSlug, storeSlug), {
 		variables: {
 			pageSize: pageSize,
 			page: currentPage,
@@ -53,7 +53,7 @@ const ReviewBase: React.FC<Props> = ({ page = 1, pageSize = 5, productId = '', s
    */
 	return (
 		<Grid>
-			<ReviewSummary productId={productId} />
+			<ReviewSummary productSlug={productSlug} />
 			<Grid container gap={4}>
 				{data.reviews.data.map((obj: any, index: number) => {
 					return <ReviewItem key={`prod_review_${index}`} id={obj.id} />;

@@ -22,14 +22,14 @@ export const single_review_by_id = gql`
 	}
 `;
 
-export const all_reviews_by_filter = (productId: string, storeSlug: string) => {
+export const all_reviews_by_filter = (productSlug: string, storeSlug: string) => {
 	let filters = '';
 
-	if (productId !== '' && storeSlug === '') {
-		filters += `Product:{id:{containsi:${productId}}}`;
+	if (productSlug !== '' && storeSlug === '') {
+		filters += `Product:{slug:{contains:"${productSlug}"}}`;
 	}
 
-	if (storeSlug !== '' && productId === '') {
+	if (storeSlug !== '' && productSlug === '') {
 		filters += `Store:{slug: {contains:"${storeSlug}"}}`;
 	}
 
@@ -52,14 +52,14 @@ export const all_reviews_by_filter = (productId: string, storeSlug: string) => {
   `;
 };
 
-export const paginated_reviews = (productId: string, storeSlug: string) => {
+export const paginated_reviews = (productSlug: string, storeSlug: string) => {
 	let filters = '';
 
-	if (productId !== '') {
-		filters += `Product:{id:{containsi:${productId}}}`;
+	if (productSlug !== '') {
+		filters += `Product:{slug:{contains:"${productSlug}"}}`;
 	}
 
-	if (storeSlug !== '' && productId === '') {
+	if (storeSlug !== '' && productSlug === '') {
 		filters += `Store:{slug: {contains:"${storeSlug}"}}`;
 	}
 

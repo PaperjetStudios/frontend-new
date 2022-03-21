@@ -10,13 +10,18 @@ import Typography from '@mui/material/Typography';
 import { CardActionArea, Skeleton } from '@mui/material';
 import { ApolloError, useQuery } from '@apollo/client';
 import { single_product_by_id } from './queries';
+import { single_product_by_slug } from './queries';
 import { createProductLink, currentApi } from '../../config/config';
 import colors from '../../theme/colors';
 import { moneyFormatter } from '../../config/util';
 import { useNavigate } from 'react-router-dom';
 
+// type Props = {
+// 	id: number;
+// };
+
 type Props = {
-	id: number;
+	product_slug: string;
 };
 
 const CustomizedCard = styled(Card)`
@@ -47,14 +52,16 @@ const CustomizedCard = styled(Card)`
 	}
 `;
 
-const ProductCard: React.FC<Props> = ({ id }) => {
+const ProductCard: React.FC<Props> = ({ product_slug }) => {
 	let navigate = useNavigate();
 
-	const { loading, data } = useQuery(single_product_by_id, {
+	const { loading, data } = useQuery(single_product_by_slug, {
 		variables: {
-			id: id,
+			slug: product_slug,
 		},
-		onCompleted: data => {},
+		onCompleted: data => {
+			// console.log('Product Slug query', data);
+		},
 		onError: (error: ApolloError) => {
 			console.log(JSON.stringify(error));
 		},
@@ -64,13 +71,15 @@ const ProductCard: React.FC<Props> = ({ id }) => {
 		return <Skeleton variant='rectangular' width={270} height={270} />;
 	}
 
-	const { Title, slug, Featured_Image, Variation, On_Sale } = data?.product?.data?.attributes;
+	const { Title, slug, Featured_Image, Variation, On_Sale } = data?.products?.data[0]?.attributes;
+	// const { Title, slug, Featured_Image, Variation, On_Sale } = data?.product?.data?.attributes;
 
 	return (
 		<CustomizedCard>
 			<CardActionArea
 				onClick={() => {
-					navigate(createProductLink(id.toString()));
+					// navigate(createProductLink(id.toString()));
+					navigate(createProductLink(slug.toString()));
 				}}
 				disableRipple>
 				<Box

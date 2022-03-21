@@ -19,7 +19,8 @@ type Props = {
 	categorySlug?: string;
 	tagsSlug?: string;
 	storeSlug?: string;
-	condition?: 'Any' | 'New' | 'Used';
+	productCondition?: 'Any' | 'New' | 'Used';
+	onSale?;
 	displayFilterBar?: boolean;
 	displayPagination?: boolean;
 };
@@ -30,7 +31,8 @@ const ProductCardList: React.FC<Props> = ({
 	categorySlug = '',
 	tagsSlug = '',
 	storeSlug = '',
-	condition = '',
+	onSale = 'Any',
+	productCondition = 'Any',
 	displayFilterBar = false,
 	displayPagination = false,
 }) => {
@@ -45,25 +47,34 @@ const ProductCardList: React.FC<Props> = ({
 
 	const [currentPage, setCurrentPage] = React.useState(page);
 
-	// Just an example of the filter bar
-	const [productCondition, setProductCondition] = React.useState(condition);
+	const [filters, setFilters] = React.useState({
+		condition: productCondition,
+		sale: onSale,
+	});
 
 	const handleFilterChange = (event: SelectChangeEvent) => {
-		setProductCondition(event.target.value);
+		const fieldValue = event.target.value;
+		setFilters({
+			...filters,
+			[event.target.name]: fieldValue,
+		});
 	};
 
-	const { loading, data } = useQuery(paginated_products(categorySlug, storeSlug, tagsSlug, productCondition), {
-		variables: {
-			pageSize: pageSize,
-			page: currentPage,
-		},
-		onCompleted: (data: any) => {
-			console.log(data);
-		},
-		onError: (error: ApolloError) => {
-			console.log(JSON.stringify(error));
-		},
-	});
+	const { loading, data } = useQuery(
+		paginated_products(categorySlug, storeSlug, tagsSlug, (productCondition = filters.condition), (onSale = filters.sale)),
+		{
+			variables: {
+				pageSize: pageSize,
+				page: currentPage,
+			},
+			onCompleted: (data: any) => {
+				// console.log(data);
+			},
+			onError: (error: ApolloError) => {
+				console.log(JSON.stringify(error));
+			},
+		}
+	);
 
 	if (loading || data === undefined) {
 		return <Loader />;
@@ -74,7 +85,7 @@ const ProductCardList: React.FC<Props> = ({
 			{displayFilterBar && (
 				// Conditionally load the filter bar so this component can be re-used for the "Related Products" etc on Product pages
 				<Box sx={{ justifyContent: 'flex-end', display: 'flex', my: 7 }}>
-					<ProductFilter filter={productCondition} onChangeValue={handleFilterChange} />
+					<ProductFilter filter={filters} onChangeValue={handleFilterChange} />
 				</Box>
 			)}
 			<Grid
@@ -92,7 +103,8 @@ const ProductCardList: React.FC<Props> = ({
 				{data.products.data.map((obj: any, ind: number) => {
 					return (
 						<Grid key={`prod_${ind}`} item xs={6} md={3}>
-							<ProductCard id={obj.id} />
+							{/* <ProductCard id={obj.id} /> */}
+							<ProductCard product_slug={obj.attributes.slug} />
 						</Grid>
 					);
 				})}
