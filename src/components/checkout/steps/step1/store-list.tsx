@@ -1,28 +1,19 @@
-import {
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { ApolloError, gql, useQuery } from "@apollo/client";
+import { Stack, Typography } from "@mui/material";
+import { ApolloError, useQuery } from "@apollo/client";
 
 import { GET_STORE_BY_ID } from "../../../store/queries";
 import { StoreData } from "../../../store/types";
 
 import Loader from "../../../loader";
 
-import colors from "../../../../theme/colors";
 import CartPreviewItem from "../../../cart/cart-preview-item";
 import { CartItem } from "../../../cart/types";
 import { useState } from "react";
-import { moneyFormatter } from "../../../../config/util";
+
 import { Box } from "@mui/system";
-import DeliveryMethod from "./delivery-method";
+
 import DeliveryMethodElement from "./delivery-method";
-import PepWidget from "./pep";
+
 import _ from "lodash";
 import ShadowContainer from "../../../common/shadow-container";
 
@@ -33,14 +24,12 @@ export type StoreListProps = {
 
 const StoreList: React.FC<StoreListProps> = ({ storeList, storeId }) => {
   const [storeData, setStoreData] = useState<StoreData>(null);
-  const [value, setValue] = useState("");
 
-  const { loading, data } = useQuery(GET_STORE_BY_ID, {
+  const { loading } = useQuery(GET_STORE_BY_ID, {
     variables: {
       id: storeId,
     },
     onCompleted: (data) => {
-      console.log(data);
       setStoreData(data.store.data.attributes);
     },
     onError: (error: ApolloError) => {
@@ -69,6 +58,7 @@ const StoreList: React.FC<StoreListProps> = ({ storeList, storeId }) => {
             <CartPreviewItem
               {...obj}
               size="checkout"
+              showSidecart={false}
               key={obj.Product.data.attributes.Title}
             />
           );

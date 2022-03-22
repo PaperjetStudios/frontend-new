@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 export const BASE_ORDER = gql`
   fragment BASE_ORDER on Order {
     Unique
-    Payment
+
     Items
     Status
     Total_Items

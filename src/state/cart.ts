@@ -7,6 +7,8 @@ import { produce } from "immer";
 import { currentApi } from "../config/config";
 import { DeliveryMethodOption } from "../components/store/types";
 import { config } from "../components/checkout/config";
+import { Address } from "../forms/user/address/types";
+import { empty, FormType } from "../forms/user/guest-info/types";
 
 const authStorageKey = currentApi.cartStateName;
 
@@ -27,12 +29,20 @@ export type Totals = {
   total: number;
 };
 
+export type GuestUser = FormType;
+
 interface Cart {
   loading: boolean;
   showing: boolean;
   id?: number;
   cart?: CartItems[];
   totals?: Totals;
+  address: {
+    selectedId: number;
+    address?: Address;
+  };
+  guest?: GuestUser;
+  walletPayment?: number | string;
 }
 
 const emptyCart = {
@@ -41,19 +51,54 @@ const emptyCart = {
   id: undefined,
   cart: [],
   totals: undefined,
+  address: {
+    selectedId: 0,
+  },
+  guest: empty,
+  walletPayment: 0,
 };
 
 export const cartState = newRidgeState<Cart>(emptyCart, {
   onSet: (newState) => {
     // calculate totals
-
     try {
       localStorage.setItem(authStorageKey, JSON.stringify(newState));
     } catch (e) {}
   },
 });
 
-//
+export const resetCart = () => {
+  cartState.set(emptyCart);
+};
+
+export const setGuest = (newGuest) => {
+  // Set the new state
+  cartState.set((prevState) => {
+    return {
+      ...prevState,
+      guest: newGuest,
+    };
+  });
+};
+
+export const setWalletPayment = (amount) => {
+  // Set the new state
+  cartState.set((prevState) => {
+    return {
+      ...prevState,
+      walletPayment: amount,
+    };
+  });
+};
+export const setCartUser = (newGuest) => {
+  // Set the new state
+  cartState.set((prevState) => {
+    return {
+      ...prevState,
+      guest: newGuest,
+    };
+  });
+};
 
 const setTotals = (newCart): Totals => {
   if (newCart.length > 0) {
@@ -71,11 +116,14 @@ const setTotals = (newCart): Totals => {
           parseInt(
             Item.Product.data.attributes.Variation[Item.Variation].Price
           );
-        const deliveryPrice = Items.selectedDelivery.option.Cost;
+
         newTotals.total_items = newTotals.total_items + productPrice;
-        newTotals.delivery = newTotals.delivery + deliveryPrice;
-        newTotals.total = newTotals.total + productPrice + deliveryPrice;
+
+        newTotals.total = newTotals.total + productPrice;
       });
+      const deliveryPrice = Items.selectedDelivery.option.Cost;
+      newTotals.delivery = newTotals.delivery + deliveryPrice;
+      newTotals.total = newTotals.total + deliveryPrice;
     });
 
     return newTotals;
@@ -259,6 +307,16 @@ export const updateCart = (
   });
 
   return newCart;
+};
+
+// SET SELECTED ADDRESS
+export const setAddress = (index: number, address: Address) => {
+  cartState.set((prevState) => {
+    return produce(cartState.get(), (draft) => {
+      draft.address.selectedId = index;
+      draft.address.address = address;
+    });
+  });
 };
 
 // setInitialState fetches data from localStorage

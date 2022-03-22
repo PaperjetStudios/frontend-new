@@ -63,20 +63,11 @@ function useUser() {
   useEffect(() => {
     if (!user) {
       // setLoadingUser(false);
+      console.log("no user");
       setUserData(null);
     } else {
+      console.log("user");
       if (!userData) {
-        // axiosInstance()
-        //   .get(`api/users/me`)
-        //   .then((response) => {
-        //     console.log("getting", response.data);
-        //     setUserData(response.data);
-        //     setLoadingUser(false);
-        //   })
-        //   .catch((error) => {
-        //     console.log("An error occurred:", error.response);
-        //     setLoadingUser(false);
-        //   });
         getUserData({ variables: { id: user.id } });
       }
     }

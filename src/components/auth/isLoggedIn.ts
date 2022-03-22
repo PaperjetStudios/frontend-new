@@ -4,10 +4,12 @@ import { ApolloError, gql, useQuery } from "@apollo/client";
 type LoginStatus = {
   isLoggedIn: boolean | null;
   loading: boolean;
+  userId?: number | string;
 };
 
 function useLoggedIn(): LoginStatus {
   const [isLoggedIn, setLoggedIn] = useState(null);
+  const [userId, setUserId] = useState(null);
   const { loading } = useQuery(
     gql`
       query ME {
@@ -20,12 +22,12 @@ function useLoggedIn(): LoginStatus {
     `,
     {
       onCompleted: (data) => {
-        console.log("User is logged in: ", data);
         setLoggedIn(true);
+        setUserId(data.me.id);
       },
       onError: (err: ApolloError) => {
-        console.log("User NOT logged in: ", err);
         setLoggedIn(false);
+        setUserId(null);
       },
       fetchPolicy: "network-only",
     }
@@ -35,7 +37,7 @@ function useLoggedIn(): LoginStatus {
     console.log("loading....");
   }
 
-  return { isLoggedIn, loading };
+  return { isLoggedIn, loading, userId };
 }
 
 export default useLoggedIn;

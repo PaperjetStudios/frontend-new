@@ -31,4 +31,4 @@ export const createStoreLink = (slug: string) => {
 
 export const DefaultPageSize = 2;
 
-export const currentApi = api;
+export const currentApi = dev_api;

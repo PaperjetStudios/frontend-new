@@ -44,7 +44,7 @@ const DeliveryMethodElement: React.FC<DeliveryMethod & Props> = ({
   id,
   delivery_options,
 }) => {
-  const [cart, setCart] = cartState.use();
+  const [cart] = cartState.use();
   const [pepShowing, showPep] = useState<boolean>(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

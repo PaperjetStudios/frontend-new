@@ -28,6 +28,8 @@ import OrderHolder from "../pages/template/order-holder";
 import Order from "../pages/template/order";
 import { BrowserHistory } from "history";
 import { cartState } from "../state/cart";
+import OrderMade from "../pages/order-made";
+import OrderDeclined from "../pages/order-declined";
 
 const BaseRoutes: React.FC = () => {
   const navigation = useContext(UNSAFE_NavigationContext)
@@ -50,6 +52,9 @@ const BaseRoutes: React.FC = () => {
       <Route path="/" element={<Homepage />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/login-register" element={<LoginRegisterPage />} />
+
+      <Route path="/order-made" element={<OrderMade />} />
+      <Route path="/order-declined" element={<OrderDeclined />} />
 
       <Route path="/profile/" element={<ProfilePage />}>
         <Route index element={<Account />} />

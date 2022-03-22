@@ -11,15 +11,6 @@ const Authorized: React.FC<Props> = ({ children, redirect, guest = false }) => {
   let loginStatus = useLoggedIn();
   let location = useLocation();
 
-  console.log("AUTHORIZED");
-  console.log(
-    "isLoggedIn: ",
-    loginStatus.isLoggedIn,
-    "inverse: ",
-    !loginStatus.isLoggedIn
-  );
-  console.log("Guest: ", guest, "inverse: ", !guest);
-
   // Show the loader while still loading user's login status
   if (loginStatus.isLoggedIn === null) {
     return <Loader />;

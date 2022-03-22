@@ -42,7 +42,11 @@ const TotalListItem: React.FC<ListItemProps> = ({
   }
 };
 
-const Totals: React.FC = () => {
+type TotalsProps = {
+  nextAction?: () => void;
+};
+
+const Totals: React.FC<TotalsProps> = ({ nextAction }) => {
   const [cart, setCart] = cartState.use();
 
   const { nextStep } = useWizard();
@@ -84,7 +88,13 @@ const Totals: React.FC = () => {
         }}
         endIcon={Icons.chevron.right}
         variant="contained"
-        onClick={() => nextStep()}
+        onClick={() => {
+          if (nextAction) {
+            nextAction();
+          } else {
+            nextStep();
+          }
+        }}
       >
         Continue
       </Button>

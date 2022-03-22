@@ -1,4 +1,12 @@
-import { Box, Grid, Stack, Step, StepLabel, Stepper } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Grid,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+} from "@mui/material";
 
 import { useWizard } from "react-use-wizard";
 
@@ -6,11 +14,12 @@ import { StepperConnector } from "./stepper";
 import { StepSetup } from "./types";
 
 type StepProps = {
-  handleCurrentStep: () => Promise<boolean>;
+  handleCurrentStep?: () => Promise<boolean>;
   stepSetup: StepSetup;
   unlocked: number;
   hideFooter?: boolean;
   sidebar?: React.ReactElement;
+  error?: string[];
 };
 
 export const StepBox: React.FC<StepProps> = ({
@@ -20,6 +29,7 @@ export const StepBox: React.FC<StepProps> = ({
   children,
   hideFooter = true,
   sidebar = null,
+  error = "",
 }) => {
   const {
     handleStep,
@@ -31,11 +41,14 @@ export const StepBox: React.FC<StepProps> = ({
     isLastStep,
   } = useWizard();
 
-  handleStep(() => handleCurrentStep());
+  if (handleCurrentStep) {
+    handleStep(() => handleCurrentStep());
+  }
 
   return (
     <Stack sx={{ width: "100%" }} spacing={4}>
       <Stepper
+        sx={{ pt: 7 }}
         alternativeLabel
         activeStep={activeStep}
         connector={<StepperConnector />}
@@ -53,8 +66,9 @@ export const StepBox: React.FC<StepProps> = ({
           </Step>
         ))}
       </Stepper>
+
       <Box>
-        {sidebar ? (
+        {sidebar !== null ? (
           <Grid
             container
             spacing={{
@@ -64,7 +78,7 @@ export const StepBox: React.FC<StepProps> = ({
             }}
             justifyContent="flex-start"
             sx={{
-              pt: 4,
+              pt: error !== "" ? 0 : 4,
               pb: 3,
             }}
           >
@@ -76,7 +90,7 @@ export const StepBox: React.FC<StepProps> = ({
             </Grid>
           </Grid>
         ) : (
-          { children }
+          <>{children}</>
         )}
       </Box>
       {!hideFooter && (

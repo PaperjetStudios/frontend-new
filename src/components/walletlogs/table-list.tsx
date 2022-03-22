@@ -37,6 +37,8 @@ const WalletTableList: React.FC<Props> = ({ page = 1, userId }) => {
 
   const { loadingUser, userData } = useUser();
 
+  console.log("userData", userData);
+
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
   };
@@ -51,7 +53,7 @@ const WalletTableList: React.FC<Props> = ({ page = 1, userId }) => {
     },
   });
 
-  if (loading || loadingUser || data === undefined) {
+  if (loading || loadingUser || data === undefined || userData === undefined) {
     return <Loader />;
   }
 

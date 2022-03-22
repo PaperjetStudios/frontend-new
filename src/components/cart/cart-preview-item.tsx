@@ -14,12 +14,14 @@ import { Box } from "@mui/system";
 
 type Props = {
   size?: "checkout" | "preview";
+  showSidecart?: boolean;
 };
 
 const CartPreviewItem: React.FC<CartItem & Props> = ({
   Product,
   Quantity: QuantityValue,
   Variation: VariationValue,
+  showSidecart = true,
   size = "preview",
 }) => {
   const { Title, Featured_Image, Variation, slug } = Product.data.attributes;
@@ -62,7 +64,7 @@ const CartPreviewItem: React.FC<CartItem & Props> = ({
           size="small"
           value={QuantityValue}
           setValue={(e) => {
-            updateCart(Product, e, VariationValue, true);
+            updateCart(Product, e, VariationValue, showSidecart);
           }}
           max={5}
         />

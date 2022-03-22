@@ -10,7 +10,7 @@ const PepWidget: React.FC<PepProps> = ({ setPepPoint }) => {
   useEffect(() => {
     function receiveMessage(message) {
       if (
-        message.origin == "https://map.paxi.co.za" &&
+        message.origin === "https://map.paxi.co.za" &&
         message.data &&
         message.data.trg === "paxi"
       ) {
@@ -24,10 +24,11 @@ const PepWidget: React.FC<PepProps> = ({ setPepPoint }) => {
     return () => {
       window.removeEventListener("message", receiveMessage);
     };
-  }, []);
+  }, [setPepPoint]);
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
       <iframe
+        title="pep-store-locator"
         width="100%"
         height="100%"
         src="https://map.paxi.co.za?size=l,m,s&status=1,3,4&maxordervalue=1000&output=nc&select=true"

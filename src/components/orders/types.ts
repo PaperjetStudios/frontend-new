@@ -2,7 +2,19 @@ export type OrderProps = {
   id: string;
   Unique: string;
   Payment: any;
-  Delivery_Address: any;
+  Delivery_Address: {
+    method?: any;
+    option?: any;
+    extra?: any;
+    address?: {
+      street_1?: string;
+      street_2?: string;
+      suburb?: string;
+      city?: string;
+      province?: string;
+      country?: string;
+    };
+  };
   Items: any;
   Total_Items: number;
   Total_Delivery: number;
