@@ -9,20 +9,23 @@ interface User {
   cartId?: string;
 }
 
-export const userState = newRidgeState<User>(
-  {
-    id: undefined,
-    jwt: undefined,
-    cartId: undefined,
+const emptyUser = {
+  id: undefined,
+  jwt: undefined,
+  cartId: undefined,
+};
+
+export const userState = newRidgeState<User>(emptyUser, {
+  onSet: (newState) => {
+    try {
+      localStorage.setItem(authStorageKey, JSON.stringify(newState));
+    } catch (e) {}
   },
-  {
-    onSet: (newState) => {
-      try {
-        localStorage.setItem(authStorageKey, JSON.stringify(newState));
-      } catch (e) {}
-    },
-  }
-);
+});
+
+export const resetUser = () => {
+  userState.set(emptyUser);
+};
 
 // setInitialState fetches data from localStorage
 async function setInitialState() {

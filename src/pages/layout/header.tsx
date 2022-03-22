@@ -1,5 +1,5 @@
 import { ApolloError, useQuery } from "@apollo/client";
-import { Button } from "@mui/material";
+import { Badge, BadgeProps, Button, IconButton } from "@mui/material";
 import useLoggedIn from "../../components/auth/isLoggedIn";
 import Box from "../../components/box";
 import { Icons } from "../../components/icons";
@@ -14,13 +14,35 @@ import { Link } from "react-router-dom";
 import BaseModal from "../../modal/base-modal";
 import { useState } from "react";
 import LoginModal from "../../modal/login-modal";
+import { cartState } from "../../state/cart";
+import styled from "@emotion/styled";
+
+import { reduce } from "lodash";
 
 type Props = {
   className?: string;
 };
 
+const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 13,
+    border: `0px solid #000`,
+    padding: "0 2px",
+  },
+}));
+
 const Header: React.FC<Props> = ({ children }) => {
   const [loginModalOpen, loginModalToggle] = useState(false);
+
+  const [cart, setCart] = cartState.use();
+  const cartItemsCount = reduce(
+    cart?.cart,
+    (count, n) => {
+      return count + n.items.length;
+    },
+    0
+  );
 
   const { loading, data: options } = useQuery(options_query, {
     onCompleted: (data) => {
@@ -130,16 +152,19 @@ const Header: React.FC<Props> = ({ children }) => {
             >
               {Icons.heart}
             </Button>
-            <Button
-              style={{
-                color: "#000",
-                fontSize: "20px",
-                padding: "0",
-                minWidth: "30px",
+            <IconButton
+              aria-label="cart"
+              onClick={() => {
+                cartState.set((prevState) => ({
+                  ...prevState,
+                  showing: true,
+                }));
               }}
             >
-              {Icons.shoppingcart}
-            </Button>
+              <StyledBadge badgeContent={cartItemsCount} color="secondary">
+                {Icons.shoppingcart}
+              </StyledBadge>
+            </IconButton>
           </Box>
         </Box>
 

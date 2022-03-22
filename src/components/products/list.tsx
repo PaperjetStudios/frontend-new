@@ -1,73 +1,112 @@
-import * as React from "react";
+import React, { useEffect } from 'react';
 
-import { Grid, Pagination } from "@mui/material";
-import { ApolloError, useQuery } from "@apollo/client";
+import { Grid, Box } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 
-import Loader from "../loader";
-import { paginated_products } from "./queries";
-import ProductCard from "./card";
-import Box from "../box";
+import { ApolloError, useQuery } from '@apollo/client';
+
+import { useLocation } from 'react-router-dom';
+
+import Loader from '../loader';
+import { paginated_products } from './queries';
+import ProductCard from './card';
+import ProductFilter from './filter';
+import PJSPagination from '../pagination';
 
 type Props = {
-  pageSize: number;
-  page: number;
-  categorySlug?: string;
-  tagsSlug?: string;
-  storeSlug?: string;
+	pageSize: number;
+	page: number;
+	categorySlug?: string;
+	tagsSlug?: string;
+	storeSlug?: string;
+	condition?: 'Any' | 'New' | 'Used';
+	displayFilterBar?: boolean;
 };
 
 const ProductCardList: React.FC<Props> = ({
-  page = 1,
-  pageSize = 5,
-  categorySlug = "",
-  tagsSlug = "",
-  storeSlug = "",
+	page = 1,
+	pageSize = 5,
+	categorySlug = '',
+	tagsSlug = '',
+	storeSlug = '',
+	condition = '',
+	displayFilterBar = false,
 }) => {
-  const [currentPage, setCurrentPage] = React.useState(page);
+	const location = useLocation();
+	const query = new URLSearchParams(location.search);
+	const pageParam = parseInt(query.get('page') || '1', 10);
 
-  const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setCurrentPage(value);
-  };
+	// Reload component when page number changes
+	useEffect(() => {
+		setCurrentPage(pageParam);
+	}, [pageParam]);
 
-  const { loading, data } = useQuery(
-    paginated_products(categorySlug, storeSlug, tagsSlug),
-    {
-      variables: {
-        pageSize: pageSize,
-        page: currentPage,
-      },
-      onCompleted: (data: any) => {
-        console.log(data);
-      },
-      onError: (error: ApolloError) => {
-        console.log(JSON.stringify(error));
-      },
-    }
-  );
+	const [currentPage, setCurrentPage] = React.useState(page);
 
-  if (loading || data === undefined) {
-    return <Loader />;
-  }
+	// Just an example of the filter bar
+	const [productCondition, setProductCondition] = React.useState(condition);
 
-  return (
-    <Box className="w-full">
-      <Grid container spacing={2} className="mb-5">
-        {data.products.data.map((obj: any, ind: number) => {
-          return (
-            <Grid key={`prod_${ind}`} item xs={6} md={2}>
-              <ProductCard id={obj.id} />
-            </Grid>
-          );
-        })}
-      </Grid>
-      <Pagination
-        count={data.products.meta.pagination.pageCount}
-        size="small"
-        page={currentPage}
-        onChange={handleChange}
-      />
-    </Box>
-  );
+	const handleFilterChange = (event: SelectChangeEvent) => {
+		setProductCondition(event.target.value);
+	};
+
+	const { loading, data } = useQuery(
+		paginated_products(categorySlug, storeSlug, tagsSlug, productCondition),
+		{
+			variables: {
+				pageSize: pageSize,
+				page: currentPage,
+			},
+			onCompleted: (data: any) => {
+				console.log(data);
+			},
+			onError: (error: ApolloError) => {
+				console.log(JSON.stringify(error));
+			},
+		}
+	);
+
+	if (loading || data === undefined) {
+		return <Loader />;
+	}
+
+	return (
+		<>
+			{displayFilterBar && (
+				// Conditionally load the filter bar so this component can be re-used for the "Related Products" etc on Product pages
+				<Box sx={{ justifyContent: 'flex-end', display: 'flex', my: 7 }}>
+					<ProductFilter
+						filter={productCondition}
+						onChangeValue={handleFilterChange}
+					/>
+				</Box>
+			)}
+			<Grid
+				container
+				spacing={{
+					xs: 2,
+					md: 3,
+					xl: 6,
+				}}
+				justifyContent='flex-start'
+				sx={{
+					pt: 4,
+					pb: 3,
+				}}>
+				{data.products.data.map((obj: any, ind: number) => {
+					return (
+						<Grid key={`prod_${ind}`} item xs={6} md={3}>
+							<ProductCard id={obj.id} />
+						</Grid>
+					);
+				})}
+			</Grid>
+
+			{data.products.meta.pagination.pageCount !== 1 && (
+				<PJSPagination count={data.products.meta.pagination.pageCount} />
+			)}
+		</>
+	);
 };
 
 export default ProductCardList;

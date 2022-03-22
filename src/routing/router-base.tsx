@@ -1,5 +1,6 @@
-import { Routes, Route } from "react-router-dom";
-import Authorized from "../components/auth/authorized";
+import { useContext, useLayoutEffect } from "react";
+
+import { Routes, Route, UNSAFE_NavigationContext } from "react-router-dom";
 import Category from "../pages/template/category";
 
 import Checkout from "../pages/checkout";
@@ -14,7 +15,7 @@ import StoreHolder from "../pages/template/store-holder";
 import Store from "../pages/template/store";
 import BaseProduct from "../pages/layout/base-product";
 import WizardTest from "../pages/wizardTest";
-import TestPage from "../pages/testpage";
+
 import OrderFlow from "../pages/orderflow";
 import Account from "../pages/profile/account";
 import Wishlist from "../pages/profile/wishlist";
@@ -23,22 +24,37 @@ import Shop from "../pages/profile/shop";
 import Wallet from "../pages/profile/wallet";
 import ProfilePage from "../pages/profile/profile";
 import OrderHolder from "../pages/template/order-holder";
-import OrderHolderStore from "../pages/template/order-holder-store";
-import Order from "../pages/template/order";
 
-/* <Authorized guest redirect="/profile">
-            <LoginRegisterPage />
-        </Authorized> 
-        
-        <Authorized redirect="/login-register">
-        */
+import Order from "../pages/template/order";
+import { BrowserHistory } from "history";
+import { cartState } from "../state/cart";
+import OrderMade from "../pages/order-made";
+import OrderDeclined from "../pages/order-declined";
 
 const BaseRoutes: React.FC = () => {
+  const navigation = useContext(UNSAFE_NavigationContext)
+    .navigator as BrowserHistory;
+
+  useLayoutEffect(() => {
+    if (navigation) {
+      navigation.listen((locationListener) => {
+        // hide the cart preview every dom change
+        cartState.set((prevState) => ({
+          ...prevState,
+          showing: false,
+        }));
+      });
+    }
+  }, [navigation]);
+
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/login-register" element={<LoginRegisterPage />} />
+
+      <Route path="/order-made" element={<OrderMade />} />
+      <Route path="/order-declined" element={<OrderDeclined />} />
 
       <Route path="/profile/" element={<ProfilePage />}>
         <Route index element={<Account />} />

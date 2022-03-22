@@ -65,6 +65,8 @@ const ProfilePage: React.FC<Props> = ({ children }) => {
                       {...link}
                     />
                   );
+                } else {
+                  return <></>;
                 }
               })}
             </List>

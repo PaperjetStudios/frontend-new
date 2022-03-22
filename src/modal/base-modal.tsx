@@ -1,5 +1,4 @@
 import { ApolloError, gql, useQuery } from "@apollo/client";
-import classNames from "classnames";
 
 import Box from "../components/box";
 import Loader from "../components/loader";
@@ -7,9 +6,9 @@ import Loader from "../components/loader";
 import Modal from "@mui/material/Modal";
 import Typo from "../components/typo";
 import { currentApi } from "../config/config";
-import { Button } from "@mui/material";
-import { Icons } from "../components/icons";
+
 import { ModalProps } from "./types";
+import RemoveTopButton from "../components/common/remove-top-button";
 
 const BaseModal: React.FC<ModalProps> = ({
   trigger,
@@ -67,27 +66,11 @@ const BaseModal: React.FC<ModalProps> = ({
       }}
     >
       <Box className="flex flex-col bg-white rounded-md min-w-modalWidth relative max-h-4/5">
-        <Button
-          sx={{
-            position: "absolute",
-            right: -10,
-            top: -10,
-            background: "#fff",
-            borderRadius: "100%",
-            width: "40px !important",
-            height: "40px !important",
-            minWidth: "0",
-            fontSize: 20,
-            "&:hover": {
-              background: "#ccc",
-            },
-          }}
+        <RemoveTopButton
           onClick={() => {
             toggle(false);
           }}
-        >
-          {Icons.close}
-        </Button>
+        />
         <Box
           className="p-5 rounded-t-md bg-cover"
           style={{

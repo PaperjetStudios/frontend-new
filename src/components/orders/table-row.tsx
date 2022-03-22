@@ -132,12 +132,12 @@ function OrderTableRow(props: { row: OrderProps; seller: boolean }) {
                 <TableBody>
                   <TableCell>{products}</TableCell>
                   <TableCell>
-                    <p>{row.Delivery_Address.street_1}</p>
-                    <p>{row.Delivery_Address.street_2}</p>
-                    <p>{row.Delivery_Address.suburb}</p>
-                    <p>{row.Delivery_Address.city}</p>
-                    <p>{row.Delivery_Address.province}</p>
-                    <p>{row.Delivery_Address.country}</p>
+                    <p>{row.Delivery_Address.address.street_1}</p>
+                    <p>{row.Delivery_Address.address.street_2}</p>
+                    <p>{row.Delivery_Address.address.suburb}</p>
+                    <p>{row.Delivery_Address.address.city}</p>
+                    <p>{row.Delivery_Address.address.province}</p>
+                    <p>{row.Delivery_Address.address.country}</p>
                   </TableCell>
                   <TableCell align="left">
                     {moneyFormatter(row.Total)}

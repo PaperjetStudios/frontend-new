@@ -21,6 +21,28 @@ export const BASE_PRODUCT = gql`
         attributes {
           Title
           slug
+          DeliveryMethods {
+            data {
+              id
+              attributes {
+                Title
+                Description
+                Cost
+                delivery_options {
+                  id
+                  Description
+                  Cost
+                }
+                Logo {
+                  data {
+                    attributes {
+                      url
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -79,17 +101,17 @@ export const single_product_by_id = gql`
     }
   }
 `;
-
 export const paginated_products = (
   categorySlug: string,
   storeSlug: string,
-  tagSlug: string
+  tagSlug: string,
+  condition: string
 ) => {
   //BUILD FILTERS
   let filters = "";
 
   if (categorySlug !== "") {
-    filters += `Categories:{slug: {contains:${categorySlug}}}`;
+    filters += `Categories:{slug: {contains:"${categorySlug}"}}`;
   }
 
   if (storeSlug !== "") {
@@ -99,6 +121,11 @@ export const paginated_products = (
   if (tagSlug !== "") {
     filters += `Tags:{slug: {contains:${tagSlug}}}`;
   }
+
+  if (condition !== "" && condition !== "Any") {
+    filters += `Condition:{contains:"${condition}"}`;
+  }
+
   return gql`
   query (
     $page: Int

@@ -11,6 +11,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { useState } from "react";
 import { Button } from "@mui/material";
+import ShadowContainer from "../../components/common/shadow-container";
 
 type ProfileSectionProps = {
   title: string;
@@ -55,7 +56,7 @@ const BaseProfilePage: React.FC<Props> = ({
   // Show sections if there are, otherwise show children
 
   return (
-    <Box className={classNames(className, " border h-full border-grey")}>
+    <ShadowContainer>
       <Box
         className="flex gap-5 border-b border-grey px-4 py-3 justify-between"
         vcenter
@@ -80,7 +81,7 @@ const BaseProfilePage: React.FC<Props> = ({
 
       {sections.length > 0 && (
         <TabContext value={section}>
-          <Box className="border-b border-grey">
+          <ShadowContainer noRadius noBorder>
             <TabList onChange={handleChange} aria-label="Account Tabs">
               {sections.map((ob, ind) => {
                 return (
@@ -101,19 +102,23 @@ const BaseProfilePage: React.FC<Props> = ({
                 );
               })}
             </TabList>
-          </Box>
+          </ShadowContainer>
 
           {sections.map((ob, ind) => {
             return (
-              <TabPanel key={`tabpanel_${ind}`} value={(ind + 1).toString()}>
+              <TabPanel
+                sx={{ pt: 5 }}
+                key={`tabpanel_${ind}`}
+                value={(ind + 1).toString()}
+              >
                 {ob.content}
               </TabPanel>
             );
           })}
         </TabContext>
       )}
-      <Box className="p-5">{sections.length === 0 && children}</Box>
-    </Box>
+      {sections.length === 0 && <Box>{children}</Box>}
+    </ShadowContainer>
   );
 };
 

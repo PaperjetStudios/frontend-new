@@ -74,11 +74,11 @@ const Order: React.FC<Props> = ({ children }) => {
     },
   });
 
-  if (loading) {
+  if (loading || !data) {
     return <Loader />;
   }
 
-  const ord = data.order.data.attributes;
+  const ord = data.order?.data?.attributes;
 
   const itemsCount = _.reduce(
     ord.Items,
@@ -92,9 +92,7 @@ const Order: React.FC<Props> = ({ children }) => {
     0
   );
 
-  const delivery = _.find(ord.Items, (obj) => {
-    return obj.id === "delivery";
-  });
+  const delivery = ord.Delivery_Address;
 
   const isBuyer = ord.Buyer.data.id === id;
 
@@ -124,8 +122,8 @@ const Order: React.FC<Props> = ({ children }) => {
 
           <OrderListingRow
             heading="Delivery"
-            info={delivery.title}
-            value={delivery.cost}
+            info={delivery.method.title}
+            value={delivery.option.cost}
           />
 
           <OrderListingRow heading="Total" info="" value={ord.Total} />

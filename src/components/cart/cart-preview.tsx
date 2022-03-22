@@ -1,83 +1,132 @@
 import { Button } from "@mui/material";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { cartState } from "../../state/cart";
-import Box from "../box";
+import { CartItems, cartState } from "../../state/cart";
+
+import Box from "@mui/material/Box";
 import { Icons } from "../icons";
 import Loader from "../loader";
 import CartPreviewItem from "./cart-preview-item";
 import { CartItem } from "./types";
-import useCart from "./useCart";
+
+import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 
 type Props = {};
 
 const CartPreview: React.FC = () => {
-  const { update, togglePreview, showing, loading } = useCart();
-
   const cart = cartState.useValue();
 
   useEffect(() => {}, [cart]);
 
-  if (!showing) {
-    return <></>;
-  }
+  const togglePreview = (toggle: boolean) => {
+    cartState.set((prevState) => ({
+      ...prevState,
+      showing: toggle,
+    }));
+  };
 
   return (
-    <Box className="base-layout fixed shadow-xl top-0 right-0 bottom-0 w-1/5 bg-white">
-      <Box className="w-full flex justify-end p-5">
-        <Button
-          onClick={() => {
-            togglePreview(false);
-          }}
+    <SwipeableDrawer
+      anchor={"right"}
+      open={cart.showing}
+      onClose={() => togglePreview(false)}
+      onOpen={() => togglePreview(true)}
+    >
+      <Box
+        sx={{
+          width: 450,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Box
           sx={{
-            fontSize: 20,
-            padding: 0,
-            minWidth: 0,
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "end",
           }}
         >
-          {Icons.close}
-        </Button>
-      </Box>
-      {loading && <Loader />}
-      {cart && (
-        <>
-          <Box className="border-t border-grey">
-            {cart?.attributes?.CartItem.map((obj: CartItem) => {
-              return (
-                <CartPreviewItem
-                  {...obj}
-                  key={obj.Product.data.attributes.Title}
-                />
-              );
-            })}
-          </Box>
-        </>
-      )}
-      {!cart && (
-        <Box className="w-full h-full flex justify-center items-center">
-          <p>No items in your cart yet</p>
-        </Box>
-      )}
-      <Box className="w-full">
-        <Link to="/checkout">
           <Button
-            fullWidth
+            onClick={() => {
+              togglePreview(false);
+            }}
             sx={{
-              borderRadius: "0px",
-              fontSize: 16,
+              fontSize: 20,
+              padding: 2,
+              minWidth: 0,
+            }}
+          >
+            {Icons.close}
+          </Button>
+        </Box>
+        {cart.loading && <Loader />}
+        {cart.cart.length > 0 && (
+          <>
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                flexGrow: 1,
+                mt: 1,
+                px: 1,
+                gap: "10px",
+              }}
+            >
+              {cart?.cart?.map((item: CartItems) => {
+                return item?.items?.map((obj: CartItem) => {
+                  return (
+                    <CartPreviewItem
+                      {...obj}
+                      key={obj.Product.data.attributes.Title}
+                    />
+                  );
+                });
+              })}
+            </Box>
+            <Box sx={{ width: "100%" }}>
+              <Link to="/checkout">
+                <Button
+                  fullWidth
+                  sx={{
+                    borderRadius: "0px",
+                    fontSize: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 3,
+                    display: "flex",
+                    gap: 1,
+                  }}
+                  variant="contained"
+                >
+                  Checkout {Icons.shoppingcart}
+                </Button>
+              </Link>
+            </Box>
+          </>
+        )}
+        {cart.cart.length === 0 && (
+          <Box
+            sx={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: 2,
-              display: "flex",
-              gap: 1,
+              flexGrow: 1,
+              mt: 1,
+              px: 1,
+              gap: "10px",
             }}
-            variant="contained"
           >
-            Checkout {Icons.shoppingcart}
-          </Button>
-        </Link>
+            <p>No items in your cart yet!</p>
+          </Box>
+        )}
       </Box>
-    </Box>
+    </SwipeableDrawer>
   );
 };
 

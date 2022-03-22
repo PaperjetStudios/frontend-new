@@ -6,6 +6,8 @@ export type CartItem = {
   Product: {
     data: Product;
   };
+  Store?: string | number;
+  Variation?: number;
   Quantity: number;
   Extra: string | null;
 };

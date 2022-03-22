@@ -1,4 +1,5 @@
-import { Alert, Button, TextField } from "@mui/material";
+import styled from "@emotion/styled";
+import { Alert, Button, InputBase, TextField } from "@mui/material";
 
 import React from "react";
 import {
@@ -9,8 +10,41 @@ import {
 } from "react-hook-form";
 
 import Box from "../../components/box";
+import colors from "../../theme/colors";
 
 import { FormInputProps } from "./types";
+
+const CssTextField = styled(TextField)({
+  "& label.Mui-focused": {
+    color: colors["grey-dark"],
+  },
+  "& label": {
+    fontSize: "14px",
+  },
+  "& .MuiInput-underline:after": {
+    borderBottomColor: colors["grey-dark"],
+  },
+  "& .MuiOutlinedInput-root": {
+    fontSize: "15px",
+
+    "& input": {
+      padding: "15px 15px 15px 15px",
+    },
+    "& fieldset": {
+      border: "0",
+      borderBottom: "1px solid",
+      borderWidth: 1,
+      borderColor: colors.grey,
+      borderRadius: 0,
+    },
+    "&:hover fieldset": {
+      borderColor: colors["grey-medium"],
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: colors["grey-medium"],
+    },
+  },
+});
 
 type TextInputProps = FormInputProps & {
   placeholder: string;
@@ -30,7 +64,8 @@ const PJSTextInput: React.FC<TextInputProps> = ({
   const { control } = useFormContext(); // retrieve all hook methods
 
   let errorElement = null;
-  if (error) {
+
+  if (formState?.errors[name]) {
     errorElement = <Alert severity="warning">{error}</Alert>;
   }
 
@@ -41,12 +76,11 @@ const PJSTextInput: React.FC<TextInputProps> = ({
 
   return (
     <Box className="flex flex-col gap-3 mb-5">
-      {errorElement}
       <Controller
         name={name}
         control={control}
         render={({ field: { onChange, value } }) => (
-          <TextField
+          <CssTextField
             multiline={multiline}
             maxRows={4}
             label={label ? label : ""}
@@ -57,6 +91,7 @@ const PJSTextInput: React.FC<TextInputProps> = ({
           />
         )}
       />
+      {errorElement}
     </Box>
   );
 };
