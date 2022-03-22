@@ -33,6 +33,7 @@ const Product: React.FC<Props> = ({ children }) => {
 
 	const [quantity, setQuantity] = useState<number>(1);
 
+<<<<<<< HEAD
 	let productId = undefined;
 
 	const productBySlug = useQuery(single_product_by_slug, {
@@ -45,6 +46,8 @@ const Product: React.FC<Props> = ({ children }) => {
 	});
 
 	productId = productBySlug.data?.products?.data[0]?.id;
+=======
+>>>>>>> 95ebac209c87dbe6082b6a701ba1bdf9668b4f73
 
 	const { loading, data } = useQuery(
 		gql`
@@ -74,9 +77,15 @@ const Product: React.FC<Props> = ({ children }) => {
 		return <Loader />;
 	}
 
+<<<<<<< HEAD
 	const { Title, Reviews, Description, Variation, Categories, Tags, On_Sale, Store, Additional_Information } =
 		data?.product?.data?.attributes;
 
+=======
+	const { Title, Rating, Reviews, Description, Variation, Categories } =
+		data.product.data.attributes;
+    
+>>>>>>> 95ebac209c87dbe6082b6a701ba1bdf9668b4f73
 	return (
 		<LayoutContainer>
 			<Grid container sx={{ pt: 10 }}>
@@ -219,6 +228,7 @@ const Product: React.FC<Props> = ({ children }) => {
 			</Grid>
 		</LayoutContainer>
 	);
+
 };
 
 export default Product;
