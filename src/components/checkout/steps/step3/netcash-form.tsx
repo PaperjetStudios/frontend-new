@@ -1,8 +1,7 @@
-import { Box } from "@mui/material";
 import { useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { cartState } from "../../../../state/cart";
-import { checkoutState } from "../../../../state/checkout";
+
 import useLoggedIn from "../../../auth/isLoggedIn";
 import { OrderGroup } from "../../types";
 
