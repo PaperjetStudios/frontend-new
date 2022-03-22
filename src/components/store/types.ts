@@ -10,13 +10,15 @@ export type StoreData = {
   Description: string;
   slug: string;
   Rating: number;
-  Gallery: EcomImage[];
+  // Gallery: EcomImage[];
   Contact_Details?: {
     Address: StoreAddress;
     Email: string;
     Validated: boolean;
     Social: SocialLink[];
   };
+  Featured_Image: any[];
+  Gallery: any[];
 };
 
 export type StoreAddress = {

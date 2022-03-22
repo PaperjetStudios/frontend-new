@@ -1,6 +1,7 @@
 import BasePage from "../layout/base-page";
 
 import Box from "../../components/box";
+import Authorized from "../../components/auth/authorized";
 
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -44,34 +45,36 @@ function ListItemLink(props: ProfileLink) {
 const ProfilePage: React.FC<Props> = ({ children }) => {
   const location = useLocation();
   return (
-    <BasePage slug="profile">
-      <Box className="w-full mt-10" wrapper hcenter>
-        <Box className="w-1/6">
-          <List sx={{ paddingTop: 0 }}>
-            {ProfileLinks.map((link, index) => {
-              if (!link.hidden) {
-                let current =
-                  location.pathname.replace("/" + profileSlug, "") ===
-                    link.to ||
-                  location.pathname.replace("/" + profileSlug + "/", "") ===
-                    link.to;
+    <Authorized redirect={"/login-register"}>
+      <BasePage slug="profile">
+        <Box className="w-full mt-10" wrapper hcenter>
+          <Box className="w-1/6">
+            <List sx={{ paddingTop: 0 }}>
+              {ProfileLinks.map((link, index) => {
+                if (!link.hidden) {
+                  let current =
+                    location.pathname.replace("/" + profileSlug, "") ===
+                      link.to ||
+                    location.pathname.replace("/" + profileSlug + "/", "") ===
+                      link.to;
 
-                return (
-                  <ListItemLink
-                    key={`profile_link_${index}`}
-                    current={current}
-                    {...link}
-                  />
-                );
-              }
-            })}
-          </List>
+                  return (
+                    <ListItemLink
+                      key={`profile_link_${index}`}
+                      current={current}
+                      {...link}
+                    />
+                  );
+                }
+              })}
+            </List>
+          </Box>
+          <Box className="w-5/6">
+            <Outlet />
+          </Box>
         </Box>
-        <Box className="w-5/6">
-          <Outlet />
-        </Box>
-      </Box>
-    </BasePage>
+      </BasePage>
+    </Authorized>
   );
 };
 

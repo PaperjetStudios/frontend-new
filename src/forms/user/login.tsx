@@ -23,8 +23,14 @@ type FormType = {
 const schema = yup
   .object()
   .shape({
-    email: yup.string().email().required(),
-    password: yup.string().required(),
+    email: yup
+      .string()
+      .email("Please insert your valid email address")
+      .required("Please insert your valid email address"),
+    password: yup
+      .string()
+      .min(6, "Password should have atleast 6 characters")
+      .required("Please insert your password"),
   })
   .required();
 
@@ -36,31 +42,51 @@ const LoginForm: React.FC<Props> = ({
 }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
+  console.log("State: ", userState.get());
   const [mutation_loginUser, { loading }] = useMutation(
     gql`
-      mutation ($identifier: String!, $password: String!) {
+      mutation LoginUser($identifier: String!, $password: String!) {
         login(input: { identifier: $identifier, password: $password }) {
           jwt
           user {
             id
+            username
+            email
           }
         }
       }
     `,
     {
       onCompleted: ({ login }) => {
-        userState.set({
-          jwt: login.jwt,
-          id: login.user.id,
+        console.log("LOGIN SUCCESSFUL: ", login);
+        userState.set((prevState) => {
+          return {
+            ...prevState,
+            jwt: login.jwt,
+            id: login.user.id,
+          };
         });
         onSubmit();
       },
       onError: (err: ApolloError) => {
         console.log("ERROR", JSON.stringify(err));
-        setErrorMessage("Oops, we couldn't find that user, please try again.");
+        if (err?.graphQLErrors) {
+          setErrorMessage(
+            "Oops, we couldn't find that user, please try again."
+          );
+        }
       },
     }
   );
+
+  const methods = useForm<FormType>({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    reValidateMode: "onChange",
+    resolver: yupResolver(schema),
+  });
 
   return (
     <Box style={style} className={classNames(className ? className : "")}>
@@ -80,24 +106,18 @@ const LoginForm: React.FC<Props> = ({
         submitButtonText="Login"
         mainError={errorMessage}
         loading={loading}
-        methods={useForm<FormType>({
-          defaultValues: {
-            email: "",
-            password: "",
-          },
-          resolver: yupResolver(schema),
-        })}
+        methods={methods}
       >
         <PJSTextInput
           name="email"
           label="Email"
-          error="Please insert your valid email address"
+          error={methods.formState?.errors?.email?.message}
           placeholder="Email"
         />
         <PJSTextInput
           name="password"
           label="Password"
-          error="Please insert your password"
+          error={methods.formState?.errors?.password?.message}
           placeholder="Password"
           password
         />
