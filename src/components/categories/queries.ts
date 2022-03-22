@@ -14,3 +14,16 @@ export const BASE_CATEGORY = gql`
     slug
   }
 `;
+
+export const GET_CATEGORIES = gql`
+  query {
+    categories {
+      data {
+        id
+        attributes {
+          Title
+        }
+      }
+    }
+  }
+`;
