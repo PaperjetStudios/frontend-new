@@ -2,6 +2,11 @@ import * as React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import { Icons } from "../icons";
+import { styled } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { CardActionArea, Skeleton } from "@mui/material";
 import { ApolloError, useQuery } from "@apollo/client";
@@ -14,11 +19,36 @@ import {
 import colors from "../../theme/colors";
 import { moneyFormatter } from "../../config/util";
 import { useNavigate } from "react-router-dom";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 type Props = {
   id: number;
   seller: boolean;
 };
+
+const CustomizedCard = styled(Card)`
+  border-radius: 0;
+  box-shadow: none;
+  transition: transform 0.25s;
+  .wishlist-icon-card {
+    z-index: 100;
+    transition: opacity 0.5s;
+    background-color: transparent;
+  }
+  :hover .wishlist-icon-card {
+    opacity: 1;
+  }
+  .wishlist-icon-card:hover svg path {
+    fill: ${colors["secondary"]};
+  }
+  :hover {
+    transform: translateY(-5px);
+  }
+  .MuiCardActionArea-focusHighlight {
+    background-color: transparent;
+  }
+`;
 
 const ProductCard: React.FC<Props> = ({ id, seller }) => {
   let navigate = useNavigate();
@@ -34,24 +64,17 @@ const ProductCard: React.FC<Props> = ({ id, seller }) => {
   });
 
   if (loading || data === undefined) {
-    return <Skeleton variant="rectangular" width={200} height={140} />;
+    return <Skeleton variant="rectangular" width={270} height={270} />;
   }
 
   const { Title, slug, Featured_Image, Variation } =
     data?.product?.data?.attributes;
-  console.log("Data: ", data?.product?.data?.attributes);
-  console.log("Slug: ", slug);
-  console.log("Featured_Image: ", Featured_Image);
+
+  // emulating sale styles to test layout - can't add this in Strapi
+  const Sale_Price = 80;
 
   return (
-    <Card
-      sx={{
-        maxWidth: 345,
-        boxShadow: "none",
-        borderWidth: "1px",
-        borderColor: colors["grey"],
-      }}
-    >
+    <CustomizedCard>
       <CardActionArea
         onClick={() => {
           navigate(
@@ -62,22 +85,86 @@ const ProductCard: React.FC<Props> = ({ id, seller }) => {
         }}
         disableRipple
       >
+        <Box
+          sx={{
+            px: 2,
+            top: 15,
+            width: "100%",
+            display: "flex",
+            position: "absolute",
+          }}
+        >
+          {Sale_Price > 0 && (
+            <Typography
+              variant="body3"
+              sx={{
+                py: 0.5,
+                px: 1.5,
+                color: "#fff",
+                fontWeight: 500,
+                backgroundColor: colors["secondary-light"],
+              }}
+            >
+              SALE
+            </Typography>
+          )}
+          <Box
+            className="wishlist-icon-card"
+            sx={{ position: "absolute", right: "17px", opacity: 0 }}
+          >
+            <Button
+              sx={{ padding: 0, width: "auto", fontSize: 20, minWidth: 20 }}
+            >
+              {Icons.heart}
+            </Button>
+          </Box>
+        </Box>
         <CardMedia
           component="img"
           height="140"
           image={`${currentApi.url}${Featured_Image.data.attributes.url}`}
           alt={slug}
+          sx={{
+            pb: 4,
+            borderBottom: 1,
+            borderColor: colors["grey"],
+          }}
         />
-        <CardContent>
-          <Typography gutterBottom variant="subtitle1" component="div">
+        <CardContent sx={{ px: 0, pt: 1 }}>
+          <Typography gutterBottom variant="body3" component="div">
             {Title}
           </Typography>
-          <Typography gutterBottom variant="subtitle2" component="div">
-            {moneyFormatter(Variation[0].Price)}
-          </Typography>
+          <Box sx={{ display: "flex", gap: 0.75 }}>
+            {Sale_Price > 0 && (
+              <Typography
+                gutterBottom
+                variant="body3"
+                component="div"
+                sx={{
+                  fontWeight: 500,
+                  textDecoration: "line-through",
+                  color: colors["grey-dark"],
+                }}
+              >
+                {moneyFormatter(Sale_Price)}
+              </Typography>
+            )}
+
+            <Typography
+              gutterBottom
+              variant="body3"
+              component="div"
+              sx={{
+                color: colors["grey-dark"],
+                fontWeight: 500,
+              }}
+            >
+              {moneyFormatter(Variation[0].Price)}
+            </Typography>
+          </Box>
         </CardContent>
       </CardActionArea>
-    </Card>
+    </CustomizedCard>
   );
 };
 

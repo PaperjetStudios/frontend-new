@@ -21,6 +21,14 @@ export const BASE_PRODUCT = gql`
         attributes {
           Title
           slug
+          DeliveryMethods {
+            data {
+              id
+              attributes {
+                Title
+              }
+            }
+          }
         }
       }
     }
@@ -86,13 +94,14 @@ export const paginated_products = (
   categorySlug: string,
   storeSlug: string,
   tagSlug: string,
+  condition: string,
   userID: string | number
 ) => {
   //BUILD FILTERS
   let filters = "";
 
   if (categorySlug !== "") {
-    filters += `Categories:{slug: {contains:${categorySlug}}}`;
+    filters += `Categories:{slug: {contains:"${categorySlug}"}}`;
   }
 
   if (storeSlug !== "") {
@@ -103,9 +112,21 @@ export const paginated_products = (
     filters += `Tags:{slug: {contains:${tagSlug}}}`;
   }
 
+  if (condition !== "" && condition !== "Any") {
+    filters += `Condition:{contains:"${condition}"}`;
+  }
+
   if (userID !== "") {
     filters += ` Store: { Seller: { id: { eq: ${userID} } } } `;
   }
+
+  // if ( price !== 0 ) {
+  //    filters+= '';
+  // }
+
+  // Sorting
+  // let sort = '';
+
   return gql`
   query (
     $page: Int
