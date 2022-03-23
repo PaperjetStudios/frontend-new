@@ -115,11 +115,11 @@ export const paginated_products = (
   if (condition !== "" && condition !== "Any") {
     filters += `Condition:{contains:"${condition}"}`;
   }
-
+  
   if (userID !== "") {
     filters += ` Store: { Seller: { id: { eq: ${userID} } } } `;
   }
-
+  
   // if ( price !== 0 ) {
   //    filters+= '';
   // }

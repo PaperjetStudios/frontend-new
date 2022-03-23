@@ -1,9 +1,11 @@
 import { ApolloError, gql, useMutation, useQuery } from "@apollo/client";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Grid, Box, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Box from "../../components/box";
-import useCart from "../../components/cart/useCart";
+import PJSTabs from "../../components/tabs";
+import colors from "../../theme/colors";
+import LayoutContainer from "../../components/layout-container";
+//import useCart from '../../components/cart/useCart';
 import { Category } from "../../components/categories/types";
 import { Icons } from "../../components/icons";
 import Loader from "../../components/loader";
@@ -14,15 +16,17 @@ import SocialShare from "../../components/products/share";
 import ReviewBase from "../../components/reviews/review-base";
 import { createCategoryLink } from "../../config/config";
 import { moneyFormatter } from "../../config/util";
+import { updateCart } from "../../state/cart";
 
 type Props = {};
 
+const currentVariation = 0;
+
 const Product: React.FC<Props> = ({ children }) => {
   const { product } = useParams();
+  //const { update: updateCart, loading: cartLoading } = useCart();
 
-  const { update: updateCart, loading: cartLoading } = useCart();
-
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantityValue, setQuantityValue] = useState<number>(1);
 
   const { loading, data } = useQuery(
     gql`
@@ -56,65 +60,95 @@ const Product: React.FC<Props> = ({ children }) => {
     data.product.data.attributes;
 
   return (
-    <Box wrapper hcenter className="mt-10">
-      <Grid container>
+    <LayoutContainer>
+      <Grid container sx={{ pt: 10 }}>
         <Grid sm={12} md={6}>
           <ProductGallery product={data.product.data} />
         </Grid>
-        <Grid sm={12} md={6}>
-          <Box className="md:ml-8 md:mt-10">
+        <Grid sm={12} md={6} sx={{ pt: { xs: 5, md: 0 } }}>
+          <Box sx={{ ml: { md: 10 } }}>
             <Typography variant="h5">{Title}</Typography>
             <ReviewBase reviews={Reviews.data} rating={Rating} />
-            <Box className="mt-5">
+            <Box
+              sx={{
+                mt: 3,
+                mb: 4,
+                pb: 5,
+                borderBottom: 1,
+                borderColor: colors["grey"],
+              }}
+            >
               <Typography sx={{ color: "#666" }} variant="subtitle2">
                 {Description}
               </Typography>
             </Box>
-            <Box className="mt-5 pt-5 border-t border-grey">
-              <Typography variant="body1">
-                {moneyFormatter(Variation[0].Price)}
+            <Box>
+              <Typography variant="h6">
+                {moneyFormatter(Variation[currentVariation].Price)}
               </Typography>
             </Box>
-            <Box className="mt-5 flex gap-5 border-t border-grey pt-5">
-              <Quantity value={quantity} setValue={setQuantity} max={5} />
-
-              <Button
-                variant="contained"
-                onClick={() => {
-                  if (typeof updateCart !== "boolean" && !cartLoading) {
-                    updateCart([
-                      {
-                        Product: data.product,
-                        Quantity: quantity,
-                        Extra: null,
-                      },
-                    ]);
-                  }
-                }}
-              >
-                <Box className="mr-2 text-lg">{Icons.shoppingcart}</Box>
-                Add to Cart{" "}
-                {cartLoading || (typeof updateCart === "boolean" && <Loader />)}
-              </Button>
-
-              <Button sx={{ fontSize: 20 }}>{Icons.heart}</Button>
-            </Box>
-            <Box className="mt-5 pt-5 border-t border-grey flex flex-col gap-2">
-              <Typography sx={{ color: "#666" }} variant="body2">
+            <Grid
+              container
+              sx={{
+                gap: 1,
+                borderTop: 1,
+                borderBottom: 1,
+                justifyContent: "flex-start",
+                borderColor: colors["grey"],
+                py: 4,
+                my: 5,
+              }}
+            >
+              <Grid item xs={12} lg={4} xl={3}>
+                <Quantity
+                  value={quantityValue}
+                  setValue={setQuantityValue}
+                  max={Variation[currentVariation].Quantity}
+                />
+              </Grid>
+              <Grid item xs={12} lg={4} xl={3}>
+                <Button
+                  variant="contained"
+                  disabled={Variation[currentVariation].Quantity === 0}
+                  onClick={() => {
+                    updateCart(data.product, quantityValue, 0, true);
+                  }}
+                >
+                  <Box sx={{ mr: 1 }}>{Icons.shoppingcart}</Box>
+                  Add to Cart{" "}
+                </Button>
+              </Grid>
+              <Grid item xs={3} lg={1} xl={3}>
+                <Button variant="iconBox">{Icons.heart}</Button>
+              </Grid>
+            </Grid>
+            <Stack spacing={1.25}>
+              <Typography variant="body2">
+                Availability:{" "}
+                {!Variation[currentVariation].Quantity
+                  ? "Out of Stock"
+                  : "In Stock"}
+              </Typography>
+              <Typography variant="body2">
+                SKU: {Variation[currentVariation].SKU}
+              </Typography>
+              <Typography variant="body2">
                 Categories:{" "}
-                {Categories.data.map((obj: Category) => {
+                {Categories.data.map((obj: Category, index: number) => {
                   return (
-                    <Link to={createCategoryLink(obj.id)}>
-                      <Typography sx={{ color: "#666" }} variant="body2">
-                        {obj.attributes.Title}
-                      </Typography>
-                    </Link>
+                    <>
+                      {index !== 0 && ", "}
+                      <Link to={createCategoryLink(obj.attributes.slug)}>
+                        <Typography variant="body2">
+                          {obj.attributes.Title}
+                        </Typography>
+                      </Link>
+                    </>
                   );
                 })}
               </Typography>
-
-              <Box className="flex gap-2">
-                <Typography sx={{ color: "#666" }} variant="body2">
+              <Box sx={{ display: "flex" }}>
+                <Typography sx={{ mr: 1 }} variant="body2">
                   Share On:{" "}
                 </Typography>
                 <SocialShare
@@ -124,11 +158,38 @@ const Product: React.FC<Props> = ({ children }) => {
                   ]}
                 />
               </Box>
-            </Box>
+              <Box sx={{ pt: 0.75 }}>
+                <Button color="secondary" variant="contained">
+                  Contact Seller
+                </Button>
+              </Box>
+            </Stack>
           </Box>
         </Grid>
+        <Grid sx={{ mt: 10 }}>
+          <PJSTabs
+            tabs={[
+              {
+                title: "Description",
+                content: (
+                  <Typography variant="subtitle2">{Description}</Typography>
+                ),
+              },
+              {
+                title: `Reviews (${Reviews.data.length})`,
+                content: <ReviewBase reviews={Reviews.data} rating={Rating} />,
+              },
+              {
+                title: "Additional information",
+                content: (
+                  <Typography variant="subtitle2">{Description}</Typography>
+                ),
+              },
+            ]}
+          />
+        </Grid>
       </Grid>
-    </Box>
+    </LayoutContainer>
   );
 };
 

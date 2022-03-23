@@ -16,7 +16,6 @@ import StoreHolder from "../pages/template/store-holder";
 import Store from "../pages/template/store";
 import BaseProduct from "../pages/layout/base-product";
 import WizardTest from "../pages/wizardTest";
-import TestPage from "../pages/testpage";
 import OrderFlow from "../pages/orderflow";
 import Account from "../pages/profile/account";
 import Wishlist from "../pages/profile/wishlist";
@@ -30,13 +29,6 @@ import ShopSetup from "../components/store/setup";
 import ProductSetup from "../components/products/product-setup";
 import Box from "../components/box";
 import ProductForm from "../forms/product/product";
-
-/* <Authorized guest redirect="/profile">
-            <LoginRegisterPage />
-        </Authorized> 
-        
-        <Authorized redirect="/login-register">
-        */
 
 import Order from "../pages/template/order";
 import { BrowserHistory } from "history";

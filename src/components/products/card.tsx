@@ -53,22 +53,22 @@ const CustomizedCard = styled(Card)`
 const ProductCard: React.FC<Props> = ({ id, seller }) => {
   let navigate = useNavigate();
 
-  const { loading, data } = useQuery(single_product_by_id, {
-    variables: {
-      id: id,
-    },
-    onCompleted: (data) => {},
-    onError: (error: ApolloError) => {
-      console.log(JSON.stringify(error));
-    },
-  });
+	const { loading, data } = useQuery(single_product_by_id, {
+		variables: {
+			id: id,
+		},
+		onCompleted: data => {},
+		onError: (error: ApolloError) => {
+			console.log(JSON.stringify(error));
+		},
+	});
 
-  if (loading || data === undefined) {
-    return <Skeleton variant="rectangular" width={270} height={270} />;
-  }
+	if (loading || data === undefined) {
+		return <Skeleton variant='rectangular' width={270} height={270} />;
+	}
 
-  const { Title, slug, Featured_Image, Variation } =
-    data?.product?.data?.attributes;
+	const { Title, slug, Featured_Image, Variation } =
+		data?.product?.data?.attributes;
 
   // emulating sale styles to test layout - can't add this in Strapi
   const Sale_Price = 80;
