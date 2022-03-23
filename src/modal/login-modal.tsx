@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import Box from "../components/box";
 import PJSTabs from "../components/tabs";
 import LoginForm from "../forms/user/login";
+import RegisterForm from "../forms/user/register";
 
 import BaseModal from "../modal/base-modal";
 
@@ -26,7 +27,14 @@ const LoginModal: React.FC<ModalProps> = ({ showing, toggle, trigger }) => {
           },
           {
             title: "Register",
-            content: <LoginForm />,
+            content: (
+              <RegisterForm
+                onSubmit={() => {
+                  toggle(false);
+                  navigator("/login-register", { replace: true });
+                }}
+              />
+            ),
           },
         ]}
       />

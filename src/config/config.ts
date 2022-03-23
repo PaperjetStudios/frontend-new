@@ -21,6 +21,10 @@ export const createProductLink = (slug: string) => {
   return `/products/${slug}`;
 };
 
+export const createProductSellerLink = (slug: string) => {
+  return `/profile/shop/products/${slug}`;
+};
+
 export const createCategoryLink = (id: string | number) => {
   return `/category/${id}`;
 };
@@ -31,4 +35,4 @@ export const createStoreLink = (slug: string) => {
 
 export const DefaultPageSize = 2;
 
-export const currentApi = api;
+export const currentApi = dev_api;

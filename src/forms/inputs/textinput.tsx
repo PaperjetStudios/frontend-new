@@ -1,12 +1,7 @@
-import { Alert, Button, TextField } from "@mui/material";
+import { Alert, TextField } from "@mui/material";
 
 import React from "react";
-import {
-  useForm,
-  FormProvider,
-  useFormContext,
-  Controller,
-} from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 
 import Box from "../../components/box";
 
@@ -16,7 +11,9 @@ type TextInputProps = FormInputProps & {
   placeholder: string;
   label?: string;
   password?: boolean;
+  type?: string;
   multiline?: boolean;
+  disabled?: boolean;
 };
 
 const PJSTextInput: React.FC<TextInputProps> = ({
@@ -25,13 +22,14 @@ const PJSTextInput: React.FC<TextInputProps> = ({
   error,
   label,
   password,
+  type,
   multiline,
+  disabled = false,
 }) => {
-  const { control, formState } = useFormContext(); // retrieve all hook methods
+  const { control } = useFormContext(); // retrieve all hook methods
 
   let errorElement = null;
-
-  if (formState?.errors[name]) {
+  if (error) {
     errorElement = <Alert severity="warning">{error}</Alert>;
   }
 
@@ -46,17 +44,21 @@ const PJSTextInput: React.FC<TextInputProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextField
-            multiline={multiline}
-            maxRows={4}
-            label={label ? label : ""}
-            onChange={onChange}
-            value={value}
-            placeholder={placeholder}
-            {...extraParams}
-          />
-        )}
+        render={({ field: { onChange, value } }) => {
+          return (
+            <TextField
+              multiline={multiline}
+              maxRows={4}
+              type={type}
+              label={label ? label : ""}
+              onChange={onChange}
+              value={value}
+              placeholder={placeholder}
+              {...extraParams}
+              disabled={disabled}
+            />
+          );
+        }}
       />
     </Box>
   );

@@ -1,36 +1,40 @@
-import classNames from "classnames";
-import * as yup from "yup";
-import Box from "../../components/box";
-import { useEffect } from "react";
-
-import PJSTextInput from "../inputs/textinput";
-import Loader from "../../components/loader";
-
+import React from "react";
+// Import Form Libraries
 import { useFieldArray, useFormContext } from "react-hook-form";
-
+// Import MaterialUI Components
+import { Button } from "@mui/material";
+// Import Custom React Components
+import Box from "../../components/box";
+import PJSTextInput from "../inputs/textinput";
+import SelectInput from "../inputs/selectinput";
 import { Icons } from "../../components/icons";
 import Typo from "../../components/typo";
+// Import Types
 import { StoreData } from "../../components/store/types";
 
 type Props = {
   className?: string;
   style?: {};
+  disabled?: boolean;
 };
 
-const SocialBlock: React.FC<Props> = ({ className }) => {
-  const { control, watch } = useFormContext<StoreData>();
+const SocialBlock: React.FC<Props> = ({ className, disabled = false }) => {
+  const { formState, control, watch } = useFormContext<StoreData>();
 
-  const { fields, append } = useFieldArray<StoreData, "Contact_Details.Social">(
-    {
-      control,
-      name: "Contact_Details.Social",
-    }
-  );
+  const { fields, append, remove } = useFieldArray<
+    StoreData,
+    "Contact_Details.Social"
+  >({
+    control,
+    name: "Contact_Details.Social",
+  });
 
   const watchFieldArray = watch("Contact_Details.Social");
   const watchedFields =
     fields.length > 0
       ? fields.map((field, index) => {
+          // Delete the field "__typename" to avoid graphQL Errors
+          delete watchFieldArray[index]["__typename"];
           return {
             ...field,
             ...watchFieldArray[index],
@@ -44,23 +48,62 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
         watchedFields.map((obj, ind) => {
           return (
             <Box
-              className="px-8 pt-5 pb-2 border-grey border rounded-sm"
+              className="relative px-8 pt-5 pb-2 border-grey border rounded-sm"
               key={obj.id}
             >
+              {disabled === false && (
+                <Button
+                  sx={{
+                    position: "absolute",
+                    right: -10,
+                    top: -10,
+                    background: "#000",
+                    color: "#fff",
+                    borderRadius: "100%",
+                    width: "40px !important",
+                    height: "40px !important",
+                    minWidth: "0",
+                    fontSize: 20,
+                    "&:hover": {
+                      background: "#ccc",
+                    },
+                  }}
+                  onClick={() => {
+                    remove(ind);
+                  }}
+                >
+                  {Icons.close}
+                </Button>
+              )}
               <Typo className="pb-5" t="h5">
                 Social Link {ind + 1}
               </Typo>
+
               <PJSTextInput
                 name={`Contact_Details.Social.${ind}.Url` as const}
                 label="Url"
-                error="Please insert a Url"
+                error={
+                  formState?.errors?.Contact_Details?.Social?.[ind]?.Url
+                    ?.message
+                }
                 placeholder="Url"
+                disabled={disabled}
               />
-              <PJSTextInput
+
+              <SelectInput
                 name={`Contact_Details.Social.${ind}.Type` as const}
                 label="Type"
-                error="Please choose a type"
-                placeholder="Social Platform"
+                defaultValue={obj?.Type}
+                options={[
+                  { value: "Facebook", displayText: "Facebook" },
+                  { value: "Twitter", displayText: "Twitter" },
+                  { value: "Instagram", displayText: "Instagram" },
+                ]}
+                error={
+                  formState?.errors?.Contact_Details?.Social?.[ind]?.Type
+                    ?.message
+                }
+                disabled={disabled}
               />
             </Box>
           );
@@ -68,6 +111,7 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
       <Box vcenter hcenter>
         <Box
           onClick={() =>
+            disabled === false &&
             append({
               Url: "",
               Type: "",
@@ -75,7 +119,9 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
           }
           vcenter
           hcenter
-          className="bg-grey w-24 h-24 rounded-full text-white text-4xl"
+          className={`bg-grey w-24 h-24 rounded-full text-white text-4xl ${
+            disabled === false && "cursor-pointer"
+          }`}
         >
           {Icons.plus}
         </Box>

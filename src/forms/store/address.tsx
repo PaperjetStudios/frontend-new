@@ -1,53 +1,70 @@
+import { useFormContext } from "react-hook-form";
+// Import Types
+import { StoreData } from "../../components/store/types";
+// Import Custom React Components
 import Box from "../../components/box";
+import Typo from "../../components/typo";
 import PJSTextInput from "../inputs/textinput";
 
-import { useFormContext } from "react-hook-form";
-
-import { StoreData } from "../../components/store/types";
-
-const StoreAddressBlock: React.FC = () => {
-  //const { control, watch } = useFormContext<StoreData>();
-
-  //const watchAddress = watch("Contact_Details.Address");
+type Props = {
+  disabled?: boolean;
+};
+const StoreAddressBlock: React.FC<Props> = ({ disabled = false }) => {
+  const { formState } = useFormContext<StoreData>();
 
   return (
     <Box className="md:grid md:grid-cols-2 gap-5 mb-10">
       <Box className="px-8 pt-5 pb-2 border-grey border rounded-sm">
+        <Typo className="pb-5" t="h5">
+          Store Address
+        </Typo>
         <PJSTextInput
           name={`Contact_Details.Address.Street_Address_1`}
           label="Street Address Line 1"
-          error="Please insert a Street Address"
+          error={
+            formState?.errors?.Contact_Details?.Address?.Street_Address_1
+              ?.message
+          }
           placeholder="Street Address Line 1"
+          disabled={disabled}
         />
         <PJSTextInput
           name={`Contact_Details.Address.Street_Address_2`}
           label="Street Address Line 2"
-          error="Please insert a Street Address"
+          error={
+            formState?.errors?.Contact_Details?.Address?.Street_Address_2
+              ?.message
+          }
           placeholder="Street Address Line 2"
+          disabled={disabled}
         />
         <PJSTextInput
           name={`Contact_Details.Address.Suburb`}
           label="Suburb"
-          error="Please insert a Suburb"
+          error={formState?.errors?.Contact_Details?.Address?.Suburb?.message}
           placeholder="Suburb"
+          disabled={disabled}
         />
         <PJSTextInput
           name={`Contact_Details.Address.City`}
           label="City"
-          error="Please insert a City"
+          error={formState?.errors?.Contact_Details?.Address?.City?.message}
           placeholder="City"
+          disabled={disabled}
         />
         <PJSTextInput
           name={`Contact_Details.Address.Country`}
           label="Country"
-          error="Please insert a Country"
+          error={formState?.errors?.Contact_Details?.Address?.Country?.message}
           placeholder="Country"
+          disabled={disabled}
         />
         <PJSTextInput
           name={`Contact_Details.Address.Zip_Code`}
           label="Zip Code"
-          error="Please insert a Zip Code"
+          error={formState?.errors?.Contact_Details?.Address?.Zip_Code?.message}
           placeholder="Zip Code"
+          disabled={disabled}
         />
       </Box>
     </Box>

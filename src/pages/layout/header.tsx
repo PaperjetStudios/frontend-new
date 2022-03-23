@@ -32,7 +32,7 @@ const Header: React.FC<Props> = ({ children }) => {
     },
   });
 
-  const isLoggedIn = useLoggedIn();
+  const loginStatus = useLoggedIn();
 
   if (loading) {
     return <Loader />;
@@ -79,7 +79,7 @@ const Header: React.FC<Props> = ({ children }) => {
             >
               Become a Seller
             </Button>
-            {!isLoggedIn && (
+            {loginStatus.isLoggedIn !== null && !loginStatus.isLoggedIn && (
               <Button
                 sx={{
                   ...topMenuLinkStyle,
@@ -92,7 +92,7 @@ const Header: React.FC<Props> = ({ children }) => {
                 Log In / Sign Up
               </Button>
             )}
-            {isLoggedIn && (
+            {loginStatus.isLoggedIn !== null && loginStatus.isLoggedIn && (
               <Link to="/profile">
                 <Button
                   sx={{
