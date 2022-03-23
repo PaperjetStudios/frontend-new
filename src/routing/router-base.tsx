@@ -1,6 +1,7 @@
 import { useContext, useLayoutEffect } from "react";
 
 import { Routes, Route, UNSAFE_NavigationContext } from "react-router-dom";
+import Authorized from "../components/auth/authorized";
 import Category from "../pages/template/category";
 
 import Checkout from "../pages/checkout";
@@ -15,7 +16,6 @@ import StoreHolder from "../pages/template/store-holder";
 import Store from "../pages/template/store";
 import BaseProduct from "../pages/layout/base-product";
 import WizardTest from "../pages/wizardTest";
-
 import OrderFlow from "../pages/orderflow";
 import Account from "../pages/profile/account";
 import Wishlist from "../pages/profile/wishlist";
@@ -24,6 +24,11 @@ import Shop from "../pages/profile/shop";
 import Wallet from "../pages/profile/wallet";
 import ProfilePage from "../pages/profile/profile";
 import OrderHolder from "../pages/template/order-holder";
+import OrderList from "../components/orders/table-list";
+import ShopSetup from "../components/store/setup";
+import ProductSetup from "../components/products/product-setup";
+import Box from "../components/box";
+import ProductForm from "../forms/product/product";
 
 import Order from "../pages/template/order";
 import { BrowserHistory } from "history";
@@ -54,12 +59,23 @@ const BaseRoutes: React.FC = () => {
       <Route path="/profile/" element={<ProfilePage />}>
         <Route index element={<Account />} />
         <Route path="wishlist" element={<Wishlist />} />
-        <Route path="orders" element={<Orders />} />
         <Route path="order" element={<OrderHolder />}>
           <Route path=":order" element={<Order />} />
         </Route>
-        <Route path="shop" element={<Shop />} />
-        <Route path="wallet" element={<Wallet />} />
+        <Route path="shop" element={<Shop />}>
+          <Route index element={<OrderList seller />} />
+          <Route path="setup">
+            <Route index element={<ShopSetup disabled={true} />} />
+            <Route path="create" element={<ShopSetup mode={"create"} />} />
+            <Route path="edit" element={<ShopSetup mode={"edit"} />} />
+          </Route>
+          <Route path="products">
+            <Route index element={<ProductSetup />} />
+            <Route path="create" element={<ProductSetup mode={"create"} />} />
+            <Route path=":slug" element={<ProductSetup mode={"edit"} />} />
+          </Route>
+          <Route path="banking_details" element={<Box />} />
+        </Route>
       </Route>
 
       <Route path="/wizard" element={<WizardTest />} />

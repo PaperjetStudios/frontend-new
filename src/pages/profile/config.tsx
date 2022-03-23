@@ -14,33 +14,33 @@ export type ProfileLink = {
 export const ProfileLinks: ProfileLink[] = [
   {
     title: "Account",
-    to: "",
+    to: "/profile",
     icon: Icons.menu.user,
   },
   {
     title: "Wishlist",
-    to: "wishlist",
+    to: "/profile/wishlist",
     icon: Icons.heart,
   },
   {
     title: "Order History",
-    to: "orders",
+    to: "/profile/orders",
     icon: Icons.shoppingcart,
   },
   {
     title: "Order",
-    to: "order",
+    to: "/profile/orders/order",
     icon: Icons.shoppingcart,
     hidden: true,
   },
   {
     title: "Shop",
-    to: "shop",
+    to: "/profile/shop",
     icon: Icons.store,
   },
   {
     title: "Wallet",
-    to: "wallet",
+    to: "/profile/wallet",
     icon: Icons.dollar,
   },
 ];
