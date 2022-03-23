@@ -1,18 +1,34 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect, FormEvent } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import classNames from "classnames";
+import {
+  ApolloError,
+  useQuery,
+  useLazyQuery,
+  useMutation,
+} from "@apollo/client";
 // Import Form Libraries
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+// Import Queries
+import {
+  GET_STORE_BY_ID,
+  GET_STORE_BY_USER_ID,
+  CREATE_STORE,
+  UPDATE_STORE,
+  UPLOAD_MULTIPLE_FILES,
+  CHECK_DUPLICATE_FILES,
+} from "../../components/store/queries";
 // Import Utility Functions And Variables
+import { checkRouteMatch } from "../../util/routes";
 import { compressImage } from "../../util/files";
 import { currentApi } from "../../config/config";
 import colors from "../../theme/colors";
 // Import Custom Hooks
-import useStore from "../../components/store/useStore";
 import useUser from "../user/useUser";
 // Import MaterialUI Components
-import { Button } from "@mui/material";
+import { Button, Box as BoxMUI } from "@mui/material";
 // Import Custom React Components
 import Box from "../../components/box";
 import PJSTextInput from "../inputs/textinput";
@@ -21,12 +37,17 @@ import StoreAddressBlock from "./address";
 import SocialBlock from "./social";
 import ImagesWidget from "./imagesWidget";
 import Typo from "../../components/typo";
+import TabHeader from "../../components/store/tabHeader";
+import NoStoreFound from "./no-store-found";
 // Import Types
-import { StoreData as storeDataType } from "../../components/store/types";
+import { StoreData } from "../../components/store/types";
+import { Icons } from "../../components/icons";
 
 type Props = {
   className?: string;
   style?: {};
+  disabled?: boolean;
+  mode?: "create" | "edit";
 };
 
 const schema = yup
@@ -46,33 +67,127 @@ const schema = yup
       }),
       Social: yup.array().of(
         yup.object().shape({
-          Url: yup.string(),
-          Type: yup.string(),
+          Url: yup.string().required("Please enter social media link Url"),
+          Type: yup.string().required("Please select social media platform"),
         })
       ),
     }),
-    Featured_Image: yup.array(),
-    Gallery: yup.array(),
-    slug: yup.string(),
+    Featured_Image: yup
+      .array()
+      .min(1, "Please select atleast one image")
+      .required("required"),
+    Gallery: yup
+      .array()
+      .min(1, "Please select atleast one image")
+      .required("required"),
   })
   .required();
 
-const StoreForm: React.FC<Props> = ({ children, className, style }) => {
-  const {
-    loadingStore,
-    storeData,
-    getStore,
-    createStore,
-    updateStore,
-    uploadFiles,
-  } = useStore();
-  const { id } = useUser();
+const StoreForm: React.FC<Props> = ({
+  children,
+  className,
+  style,
+  disabled = false,
+  mode,
+}) => {
+  const { id, userData, loadingUser } = useUser();
+  const [storeData, setStoreData] = useState<StoreData | null>();
+  const [loadingStore, setLoadingStore] = useState(true);
+  const [storeID, setStoreID] = useState(null);
+  const [loadingMessage, setLoadingMessage] = useState("Loading data");
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
-  const methods = useForm<storeDataType>({
+  // ------------------------------------------------------------------------
+  // Define queries and mutations
+  // ------------------------------------------------------------------------
+
+  // Define getStore query
+  const {
+    loading,
+    error,
+    data: getStoreData,
+  } = useQuery(GET_STORE_BY_USER_ID, {
+    skip: id && (mode === "edit" || mode === undefined) ? false : true,
+    variables: {
+      id: id,
+    },
+    onCompleted: (data) => {
+      if (data.findMyStore.data) {
+        console.log("GetStore data", data);
+        setStoreData(data.findMyStore.data.attributes);
+        setStoreID(data.findMyStore.data.id);
+      }
+    },
+    onError: (error: ApolloError) => {
+      console.log(error);
+      setStoreData(undefined);
+      setLoadingStore(false);
+    },
+  });
+
+  // Define createStore mutation
+  const [createStore, { loading: createStoreLoading }] = useMutation(
+    CREATE_STORE,
+    {
+      onCompleted: (data) => {
+        console.log("Create Store Response Data", data);
+        setStoreData(data.createStore.data.attributes);
+        if (data.createStore.data) {
+          // redirect user to the shop setup page
+          navigate("/profile/shop/setup");
+        }
+      },
+      onError: (err: ApolloError) => {
+        console.log(err);
+        setLoadingStore(false);
+      },
+    }
+  );
+
+  // Define updateStore mutation
+  const [updateStore, { loading: updateStoreLoading }] = useMutation(
+    UPDATE_STORE,
+    {
+      onCompleted: (data) => {
+        console.log("Update Store Response Data", data);
+        setStoreData(data.updateStore.data.attributes);
+      },
+      onError: (err: ApolloError) => {
+        console.log("Update Store Error: ", err);
+        setLoadingStore(false);
+      },
+    }
+  );
+
+  // Define uploadFiles mutation
+  const [uploadFiles, { loading: imageUploading, error: imageUploadError }] =
+    useMutation(UPLOAD_MULTIPLE_FILES, {
+      onCompleted: (data) => {},
+      onError: (e) => {
+        console.log("error", JSON.stringify(e));
+      },
+    });
+
+  // Define checkDuplicateFiles mutation
+  const [
+    checkDuplicateFiles,
+    { loading: checkingDuplicates, error: checkingDuplicatesError },
+  ] = useMutation(CHECK_DUPLICATE_FILES, {
+    onCompleted: (data) => {},
+    onError: (e) => {
+      console.log("error", JSON.stringify(e));
+    },
+  });
+
+  // ------------------------------------------------------------------------
+  // Define form state hanlders
+  // ------------------------------------------------------------------------
+
+  const methods = useForm<StoreData>({
     defaultValues: {
       Title: storeData?.Title ? storeData?.Title : "",
       Description: storeData?.Description ? storeData?.Description : "",
-      slug: storeData?.slug ? storeData?.slug : "",
       Rating: storeData?.Rating ? storeData?.Rating : null,
       Contact_Details: {
         Address: {
@@ -160,17 +275,6 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
   };
 
   useEffect(() => {
-    if (id) {
-      if (!storeData) {
-        // Get user's store data
-        getStore({
-          variables: {
-            id: id,
-          },
-        });
-      }
-    }
-
     if (storeData) {
       const setupImages = async () => {
         const images = await setupLoadedDataImages(storeData).then(
@@ -182,17 +286,21 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
           Featured_Image: images.featuredImage ? images.featuredImage : [],
           Gallery: images.gallery ? images.gallery : [],
         });
+        setLoadingStore(false);
       };
       setupImages();
     }
-  }, [storeData]);
 
-  if (loadingStore) {
-    return <Loader />;
-  }
+    if (mode === "create") {
+      setLoadingStore(false);
+    }
+  }, [storeData, pathname]);
 
   // Define strapiUpload function
-  const uploadFilesToStrapi = async (imagedata: any, field: string) => {
+  const uploadFilesToStrapi = async (
+    imagedata: any,
+    field: "Featured_Image" | "Gallery"
+  ) => {
     let files: any = null;
     const compressedImages = [];
     if (imagedata?.length > 0) {
@@ -221,6 +329,8 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
       });
     }
 
+    console.log("files: ", files);
+
     const uploadedImageIds =
       files !== null && files?.data?.multipleUpload !== null
         ? files?.data?.multipleUpload.map((img: any) => {
@@ -232,7 +342,43 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
     return uploadedImageIds;
   };
 
-  const submit: SubmitHandler<storeDataType> = async (data) => {
+  // Define checkDuplicates function
+  const checkDuplicates = async (
+    imagedata: any,
+    field: "Featured_Image" | "Gallery"
+  ) => {
+    let files: any = undefined;
+    const compressedImages = [];
+    if (imagedata?.length > 0) {
+      // Compress images
+      for (const item of imagedata) {
+        //@ts-ignore
+        compressedImages.push(await compressImage(item.file as File));
+      }
+
+      files = await checkDuplicateFiles({
+        variables: {
+          files: compressedImages,
+          field: field,
+          forStore: true,
+        },
+      });
+    }
+
+    if (imagedata?.length === 0) {
+      files = await checkDuplicateFiles({
+        variables: {
+          files: imagedata,
+          field: field,
+          forStore: true,
+        },
+      });
+    }
+
+    return files;
+  };
+
+  const submit: SubmitHandler<StoreData> = async (data) => {
     if (storeData) {
       // Update store
       console.log("(Update) submit data: ", data);
@@ -243,6 +389,10 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
       );
       const Gallery = await uploadFilesToStrapi(data.Gallery, "Gallery");
 
+      if (Featured_Image === "error" || Gallery === "error") {
+        return false;
+      }
+
       const variables = {
         ...data.Contact_Details.Address,
         ...data.Gallery,
@@ -251,9 +401,11 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
         Title: data.Title,
         Description: data.Description,
         Rating: data.Rating,
-        slug: data.slug,
         userID: id,
-        Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
+        Featured_Image:
+          Featured_Image && Featured_Image.length > 0
+            ? Featured_Image[0]
+            : undefined,
         Gallery: Gallery,
       };
 
@@ -274,13 +426,18 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
       );
       const Gallery = await uploadFilesToStrapi(data.Gallery, "Gallery");
 
+      // Return if there was an error with uploading the images
+      if (imageUploadError) {
+        return;
+      }
+
       const variables = {
         ...data.Contact_Details.Address,
         Social: [...data.Contact_Details.Social],
         Email: data.Contact_Details.Email,
         Title: data.Title,
         Description: data.Description,
-        Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
+        Featured_Image: Featured_Image?.length > 0 ? Featured_Image[0] : null,
         Gallery: Gallery,
         seller: id,
       };
@@ -295,21 +452,134 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
     }
   };
 
+  const formSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    // Trigger form validation
+    await methods.trigger();
+    // Check if there are any form errors
+    if (Object.keys(methods.formState?.errors).length > 0) {
+      // There are form errors, don't submit form and return
+      return false;
+    }
+
+    setLoadingMessage("Checking images");
+    setLoadingStore(true);
+
+    console.log("Do your file uploads here");
+    // Upload files to strapi
+    const Featured_Image = await checkDuplicates(
+      methods.getValues().Featured_Image,
+      "Featured_Image"
+    );
+    const Gallery = await checkDuplicates(
+      methods.getValues().Gallery,
+      "Gallery"
+    );
+
+    console.log("Featured_Image duplicates: ", Featured_Image);
+    console.log("Gallery duplicates: ", Gallery);
+
+    if (Featured_Image?.errors || Gallery?.errors) {
+      // If there was an error with uploading files set a form error
+      console.log("Throw a form error");
+      Featured_Image?.errors &&
+        methods.setError("Featured_Image", {
+          message: `Image name "${Featured_Image?.errors.message}" taken`,
+        });
+      Gallery?.errors &&
+        methods.setError("Gallery", {
+          message: `Image name "${Gallery?.errors.message}" taken`,
+        });
+      setLoadingStore(false);
+      return false;
+    }
+    if (storeData) {
+      // The user is updating a store
+      setLoadingMessage("Updating shop data");
+    } else {
+      // The user is creating a store
+      setLoadingMessage("Creating shop");
+    }
+    // Submit the form to the backend
+    console.log("Submit form data to backend");
+    methods.handleSubmit(submit)(e);
+  };
+
+  if (loadingStore) {
+    return (
+      <BoxMUI sx={{ minHeight: "15rem" }} className="text-4xl p-5">
+        <Loader size="large" />
+        <Typo t="p" className="text-sm">
+          {loadingMessage}
+        </Typo>
+      </BoxMUI>
+    );
+  }
+
+  console.log("errors: ", methods.formState?.errors);
+
+  // ------------------------------------------------------------------------
+  // Define the store setup tabHeader component actions
+  // ------------------------------------------------------------------------
+
+  const setupBaseRoute = "/profile/shop/setup";
+  const setupActions: any = [];
+  let tabHeader_title = "";
+  if (setupBaseRoute.length < pathname.length) {
+    // if the current path is a sub-route of setupBaseRoute, add an action
+    // that will allow the user to navigate back up one level, i.e. back to
+    // setupBaseRoute
+
+    tabHeader_title = mode === "create" ? "Create shop" : "Edit shop";
+    setupActions.push({
+      title: `Back`,
+      action: () => {
+        navigate(setupBaseRoute);
+      },
+    });
+  } else if (setupBaseRoute.length === pathname.length) {
+    // If the active tab is the setupBaseRoute tab add an action that
+    // will allow the user to create or edit their store
+
+    tabHeader_title = "Shop data";
+    setupActions.push({
+      title: storeData ? "Edit shop" : "Create shop",
+      action: () => {
+        navigate(
+          storeData ? `${setupBaseRoute}/edit` : `${setupBaseRoute}/create`
+        );
+      },
+    });
+  }
+
+  if (!storeData && mode === undefined) {
+    // If the user has no store
+    return (
+      <Box style={style} className={classNames(className ? className : "")}>
+        <TabHeader header_title={tabHeader_title} actions={setupActions} />
+        <NoStoreFound />
+      </Box>
+    );
+  }
+
   return (
     <Box style={style} className={classNames(className ? className : "")}>
+      <TabHeader header_title={tabHeader_title} actions={setupActions} />
       <FormProvider {...methods}>
         <form
           className={classNames(
             className ? className : "",
             "flex flex-col p-5"
           )}
-          onSubmit={methods.handleSubmit(submit)}
+          onSubmit={formSubmit}
         >
           <PJSTextInput
             name="Title"
             label="Title"
             error={methods.formState?.errors?.Title?.message}
             placeholder="Title"
+            disabled={disabled}
           />
 
           <PJSTextInput
@@ -318,6 +588,7 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
             multiline
             error={methods.formState?.errors?.Description?.message}
             placeholder="Description"
+            disabled={disabled}
           />
 
           <Box className="md:grid md:grid-cols-3 gap-5">
@@ -326,38 +597,45 @@ const StoreForm: React.FC<Props> = ({ children, className, style }) => {
               label="Contact Email"
               error={methods.formState?.errors?.Contact_Details?.Email?.message}
               placeholder="Email Address"
+              disabled={disabled}
             />
           </Box>
 
-          <StoreAddressBlock />
-          <SocialBlock />
+          <StoreAddressBlock disabled={disabled} />
+          <SocialBlock disabled={disabled} />
 
-          <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm w-min">
+          <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm w-max">
             <Typo className="pb-5 text-left" t="h5">
               Store Logo
             </Typo>
-            <ImagesWidget name={"Featured_Image"} limit={1} />
+            <ImagesWidget
+              name={"Featured_Image"}
+              limit={1}
+              disabled={disabled}
+            />
           </Box>
 
           <Box className="px-8 pt-5 pb-8 mb-10 border-grey border rounded-sm">
             <Typo className="pb-5 mt-5 text-left" t="h5">
               Store Banner Images
             </Typo>
-            <ImagesWidget name={"Gallery"} />
+            <ImagesWidget name={"Gallery"} disabled={disabled} />
           </Box>
 
-          <Button
-            type="submit"
-            sx={{ color: colors.light, backgroundColor: colors.primary }}
-          >
-            {loadingStore ? (
-              <Loader />
-            ) : storeData ? (
-              "Update Store"
-            ) : (
-              "Create Store"
-            )}
-          </Button>
+          {disabled === false && (
+            <Button
+              type="submit"
+              sx={{ color: colors.light, backgroundColor: colors.primary }}
+            >
+              {loadingStore ? (
+                <Loader />
+              ) : storeData ? (
+                "Update Store"
+              ) : (
+                "Create Store"
+              )}
+            </Button>
+          )}
         </form>
       </FormProvider>
     </Box>

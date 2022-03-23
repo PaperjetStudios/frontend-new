@@ -15,9 +15,10 @@ import { StoreData } from "../../components/store/types";
 type Props = {
   className?: string;
   style?: {};
+  disabled?: boolean;
 };
 
-const SocialBlock: React.FC<Props> = ({ className }) => {
+const SocialBlock: React.FC<Props> = ({ className, disabled = false }) => {
   const { formState, control, watch } = useFormContext<StoreData>();
 
   const { fields, append, remove } = useFieldArray<
@@ -45,34 +46,35 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
     <Box className="md:grid md:grid-cols-2 gap-5 mb-10">
       {watchedFields.length > 0 &&
         watchedFields.map((obj, ind) => {
-          console.log("Watched field: ", obj);
           return (
             <Box
               className="relative px-8 pt-5 pb-2 border-grey border rounded-sm"
               key={obj.id}
             >
-              <Button
-                sx={{
-                  position: "absolute",
-                  right: -10,
-                  top: -10,
-                  background: "#000",
-                  color: "#fff",
-                  borderRadius: "100%",
-                  width: "40px !important",
-                  height: "40px !important",
-                  minWidth: "0",
-                  fontSize: 20,
-                  "&:hover": {
-                    background: "#ccc",
-                  },
-                }}
-                onClick={() => {
-                  remove(ind);
-                }}
-              >
-                {Icons.close}
-              </Button>
+              {disabled === false && (
+                <Button
+                  sx={{
+                    position: "absolute",
+                    right: -10,
+                    top: -10,
+                    background: "#000",
+                    color: "#fff",
+                    borderRadius: "100%",
+                    width: "40px !important",
+                    height: "40px !important",
+                    minWidth: "0",
+                    fontSize: 20,
+                    "&:hover": {
+                      background: "#ccc",
+                    },
+                  }}
+                  onClick={() => {
+                    remove(ind);
+                  }}
+                >
+                  {Icons.close}
+                </Button>
+              )}
               <Typo className="pb-5" t="h5">
                 Social Link {ind + 1}
               </Typo>
@@ -81,9 +83,11 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
                 name={`Contact_Details.Social.${ind}.Url` as const}
                 label="Url"
                 error={
-                  formState?.errors?.Contact_Details?.Social[ind]?.Url?.message
+                  formState?.errors?.Contact_Details?.Social?.[ind]?.Url
+                    ?.message
                 }
                 placeholder="Url"
+                disabled={disabled}
               />
 
               <SelectInput
@@ -96,8 +100,10 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
                   { value: "Instagram", displayText: "Instagram" },
                 ]}
                 error={
-                  formState?.errors?.Contact_Details?.Social[ind]?.Type?.message
+                  formState?.errors?.Contact_Details?.Social?.[ind]?.Type
+                    ?.message
                 }
+                disabled={disabled}
               />
             </Box>
           );
@@ -105,6 +111,7 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
       <Box vcenter hcenter>
         <Box
           onClick={() =>
+            disabled === false &&
             append({
               Url: "",
               Type: "",
@@ -112,7 +119,9 @@ const SocialBlock: React.FC<Props> = ({ className }) => {
           }
           vcenter
           hcenter
-          className="bg-grey w-24 h-24 rounded-full text-white text-4xl cursor-pointer"
+          className={`bg-grey w-24 h-24 rounded-full text-white text-4xl ${
+            disabled === false && "cursor-pointer"
+          }`}
         >
           {Icons.plus}
         </Box>

@@ -147,8 +147,38 @@ export const GET_TAGS = gql`
 `;
 
 export const UPLOAD_MULTIPLE_PRODUCT_FILES = gql`
-  mutation ($files: [Upload]!, $field: String!, $forProduct: Boolean) {
-    multipleUpload(files: $files, field: $field, forProduct: $forProduct) {
+  mutation (
+    $files: [Upload]!
+    $field: String!
+    $forProduct: Boolean
+    $productID: ID
+  ) {
+    multipleUpload(
+      files: $files
+      field: $field
+      forProduct: $forProduct
+      productID: $productID
+    ) {
+      data {
+        id
+      }
+    }
+  }
+`;
+
+export const CHECK_DUPLICATE_PRODUCT_FILES = gql`
+  mutation (
+    $files: [Upload]!
+    $field: String!
+    $forProduct: Boolean
+    $productID: ID
+  ) {
+    checkDuplicateFiles(
+      files: $files
+      field: $field
+      forProduct: $forProduct
+      productID: $productID
+    ) {
       data {
         id
       }
@@ -220,6 +250,20 @@ export const UPDATE_PRODUCT = gql`
         Tags: $Tags
       }
     ) {
+      data {
+        id
+        attributes {
+          ...BASE_PRODUCT
+        }
+      }
+    }
+  }
+`;
+
+export const CHECK_PRODUCT_TITLE = gql`
+  ${BASE_PRODUCT}
+  mutation ($Title: String, $productID: ID) {
+    checkProductTitle(Title: $Title, productID: $productID) {
       data {
         id
         attributes {

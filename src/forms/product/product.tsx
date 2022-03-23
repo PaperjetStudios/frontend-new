@@ -1,20 +1,42 @@
-import React, { useEffect } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import classNames from "classnames";
+import { useNavigate } from "react-router-dom";
+import {
+  ApolloError,
+  useQuery,
+  useLazyQuery,
+  useMutation,
+} from "@apollo/client";
 // Import Form Libraries
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+// Import Queries
+import {
+  GET_TAGS,
+  UPLOAD_MULTIPLE_PRODUCT_FILES,
+  CHECK_DUPLICATE_PRODUCT_FILES,
+  CHECK_PRODUCT_TITLE,
+  CREATE_PRODUCT,
+  UPDATE_PRODUCT,
+  single_product_by_id,
+  GET_PRODUCT_BY_SLUG,
+} from "../../components/products/queries";
+import { GET_CATEGORIES } from "../../components/categories/queries";
 // Import Themes
 import colors from "../../theme/colors";
-// Import Utility Functions
+// Import Utility Functions and Variables
 import { compressImage } from "../../util/files";
+import { currentApi } from "../../config/config";
 // Import Types
-import { ProductData_SubmitType } from "../../components/products/types";
+import {
+  Product,
+  ProductData_SubmitType,
+} from "../../components/products/types";
 // Import Custom Hooks
-import useProduct from "../../components/products/useProduct";
 import useStore from "../../components/store/useStore";
 // Import MaterialUI Components
-import { Button } from "@mui/material";
+import { Button, Box as BoxMUI } from "@mui/material";
 // Import Custom React Components
 import Box from "../../components/box";
 import PJSTextInput from "../inputs/textinput";
@@ -24,11 +46,6 @@ import SelectMultipleInput from "../inputs/select-multiple-input";
 import Typo from "../../components/typo";
 import ImagesWidget from "../store/imagesWidget";
 import Loader from "../../components/loader";
-import {
-  GET_STORE_PRODUCTS_BY_USER_ID,
-  GET_PRODUCT_BY_SLUG,
-} from "../../components/products/queries";
-import { currentApi } from "../../config/config";
 
 const schema = yup
   .object()
@@ -64,20 +81,163 @@ const schema = yup
 
 type ProductFormProps = {
   className?: string;
-  slug: string;
+  slug?: string;
 };
 
 const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
+  const { storeID } = useStore();
+  const navigate = useNavigate();
+
+  const [tags, setTags] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [productData, setProductData] = useState<Product>(null);
+  const [loadingProductData, setLoadingProductData] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState(
+    slug ? "Loading product data" : "Loading form"
+  );
+
+  // ------------------------------------------------------------------------
+  // Queries and Mutations
+  // ------------------------------------------------------------------------
+
+  // Get tags query
   const {
-    tagOptions,
-    categoryOptions,
-    loadingProductData,
-    productData,
-    storeID,
+    loading: loadingGetTags,
+    error: getTagsError,
+    // data: tags,
+  } = useQuery(GET_TAGS, {
+    onCompleted: (data) => {
+      console.log("GetTags data", data);
+      setTags(data.tags.data);
+    },
+    onError: (error: ApolloError) => {
+      console.log(error);
+      setTags(null);
+    },
+  });
+
+  // Get categories query
+  const {
+    loading: loadingGetCategories,
+    error: getCategoriesError,
+    // data: categories,
+  } = useQuery(GET_CATEGORIES, {
+    onCompleted: (data) => {
+      console.log("GetCategories data", data);
+      setCategories(data.categories.data);
+    },
+    onError: (error: ApolloError) => {
+      console.log(error);
+      setCategories(null);
+    },
+  });
+
+  // Get product data query
+  const { loading: loadingGetProductBySlug, data: getProductDataResult } =
+    useQuery(GET_PRODUCT_BY_SLUG, {
+      skip: slug ? false : true,
+      variables: {
+        slug: slug,
+      },
+      onCompleted: (data) => {
+        // console.log("Get Product but slug data: ", data);
+        if (data.products.data.length > 0) {
+          delete data.products.data[0].Reviews;
+          console.log("Get Product but slug: ", data.products.data[0]);
+          setProductData(data.products.data[0]);
+        }
+      },
+      onError: (error: ApolloError) => {
+        console.log(JSON.stringify(error));
+      },
+    });
+
+  // Define uploadFiles mutation
+  const [
     uploadProductFiles,
-    createProduct,
-    updateProduct,
-  } = useProduct(slug);
+    { loading: imageUploading, error: imageUploadError },
+  ] = useMutation(UPLOAD_MULTIPLE_PRODUCT_FILES, {
+    onCompleted: (data) => {},
+    onError: (e) => {
+      console.log("error", JSON.stringify(e));
+
+      setLoadingProductData(false);
+    },
+  });
+
+  // Define checkDuplicateFiles mutation
+  const [
+    checkDuplicateFiles,
+    { loading: checkingDuplicates, error: checkingDuplicatesError },
+  ] = useMutation(CHECK_DUPLICATE_PRODUCT_FILES, {
+    onCompleted: (data) => {},
+    onError: (e) => {
+      console.log("error", JSON.stringify(e));
+    },
+  });
+
+  // Define checkProductTitle mutation
+  const [
+    checkProductTitle,
+    { loading: checkingProductTitle, error: checkingProductTitleError },
+  ] = useMutation(CHECK_PRODUCT_TITLE, {
+    onCompleted: (data) => {},
+    onError: (e) => {
+      console.log("error", JSON.stringify(e));
+    },
+  });
+
+  // Define createProduct mutation
+  const [createProduct, { loading: createProductLoading }] = useMutation(
+    CREATE_PRODUCT,
+    {
+      onCompleted: (data) => {
+        console.log("Created product: ", data);
+        setProductData(data.createProduct.data);
+        if (data.createProduct.data) {
+          // redirect the user back to the products list page
+          navigate("/profile/shop/products");
+        }
+      },
+      onError: (e) => {
+        console.log("error", JSON.stringify(e));
+
+        setLoadingProductData(false);
+      },
+    }
+  );
+
+  // Define updateProduct mutation
+  const [updateProduct, { loading: updateProductLoading }] = useMutation(
+    UPDATE_PRODUCT,
+    {
+      onCompleted: (data) => {
+        console.log("Created product: ", data);
+        setProductData(data.updateProduct.data);
+      },
+      onError: (e) => {
+        console.log("error", JSON.stringify(e));
+
+        setLoadingProductData(false);
+      },
+    }
+  );
+
+  // ------------------------------------------------------------------------
+  // Handle loading state variable
+  // ------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (tags && categories && !slug) {
+      // When the slug is undefined then the user wants to create a new
+      // product
+      setLoadingProductData(false);
+    }
+  }, [productData, tags, categories]);
+
+  // ------------------------------------------------------------------------
+  // Define form state handlers
+  // ------------------------------------------------------------------------
 
   // Define handling methods
   const methods = useForm({
@@ -193,14 +353,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
         };
 
         methods.reset(newFormState);
+        setLoadingProductData(false);
       };
       setupImages();
     }
   }, [productData]);
-
-  if (loadingProductData) {
-    return <Loader />;
-  }
 
   // Define strapiUpload function
   const uploadFilesToStrapi = async (imagedata: any, field: string) => {
@@ -218,6 +375,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
           files: compressedImages,
           field: field,
           forProduct: true,
+          productID: productData?.id,
         },
       });
     }
@@ -228,6 +386,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
           files: imagedata,
           field: field,
           forProduct: true,
+          productID: productData.id,
         },
       });
     }
@@ -243,11 +402,51 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
     return uploadedImageIds;
   };
 
+  // Define checkDuplicates function
+  const checkDuplicates = async (
+    imagedata: any,
+    field: "Featured_Image" | "Gallery"
+  ) => {
+    let files: any = undefined;
+    const compressedImages = [];
+    if (imagedata?.length > 0) {
+      // Compress images
+      for (const item of imagedata) {
+        //@ts-ignore
+        compressedImages.push(await compressImage(item.file as File));
+      }
+
+      files = await checkDuplicateFiles({
+        variables: {
+          files: compressedImages,
+          field: field,
+          forProduct: true,
+          productID: productData?.id,
+        },
+      });
+    }
+
+    if (imagedata?.length === 0) {
+      files = await checkDuplicateFiles({
+        variables: {
+          files: imagedata,
+          field: field,
+          forProduct: true,
+          productID: productData.id,
+        },
+      });
+    }
+
+    return files;
+  };
+
   // Define submit handler
-  const onSubmit: SubmitHandler<ProductData_SubmitType> = async (data) => {
+  const submit: SubmitHandler<ProductData_SubmitType> = async (data) => {
     // Check whether to update or create a store
     if (productData) {
       // Update product
+      setLoadingMessage("Updating product data");
+      setLoadingProductData(true);
       console.log("(Update) submit data: ", data);
       // Upload images to Strapi
       const Featured_Image = await uploadFilesToStrapi(
@@ -255,6 +454,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
         "Featured_Image"
       );
       const Gallery = await uploadFilesToStrapi(data.Gallery, "Gallery");
+
+      // Return if there was an error with uploading the images
+      if (imageUploadError) {
+        return;
+      }
 
       const submittedData = data;
       delete submittedData.Featured_Image;
@@ -269,20 +473,25 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
           return item;
         }),
         Store: storeID,
-        Featured_Image: Featured_Image.length > 0 ? Featured_Image[0] : null,
+        Featured_Image:
+          Featured_Image && Featured_Image.length > 0
+            ? Featured_Image[0]
+            : undefined,
         Gallery: Gallery,
       };
       console.log("variables: ", variables);
       try {
-        console.log("CreateProduct mutation starts...");
+        console.log("UpdateProduct mutation starts...");
         updateProduct({
           variables: variables,
         });
       } catch (e) {
-        console.log("OnSubmit Create Store Error: ", e);
+        console.log("OnSubmit Update Product Error: ", e);
       }
     } else {
       // Create product
+      setLoadingMessage("Creating product");
+      setLoadingProductData(true);
       console.log("(Create) submit data: ", data);
       // Upload images to Strapi
       const Featured_Image = await uploadFilesToStrapi(
@@ -313,11 +522,100 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
     }
   };
 
+  const formSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    // Trigger form validation
+    await methods.trigger();
+    // Check if there are any form errors
+    if (Object.keys(methods.formState?.errors).length > 0) {
+      // There are form errors, don't submit form and return
+      return false;
+    }
+
+    setLoadingMessage("Checking images");
+    setLoadingProductData(true);
+
+    console.log("Do your file uploads here");
+    // Upload files to strapi
+    const Featured_Image = await checkDuplicates(
+      methods.getValues().Featured_Image,
+      "Featured_Image"
+    );
+    const Gallery = await checkDuplicates(
+      methods.getValues().Gallery,
+      "Gallery"
+    );
+
+    console.log("Featured_Image duplicates: ", Featured_Image);
+    console.log("Gallery duplicates: ", Gallery);
+
+    if (Featured_Image?.errors || Gallery?.errors) {
+      // If there was an error with uploading files set a form error
+      console.log("Throw a form error");
+      Featured_Image?.errors &&
+        methods.setError("Featured_Image", {
+          message: `Image name "${Featured_Image?.errors.message}" taken`,
+        });
+      Gallery?.errors &&
+        methods.setError("Gallery", {
+          message: `Image name "${Gallery?.errors.message}" taken`,
+        });
+      setLoadingProductData(false);
+      return false;
+    }
+
+    let checkTitleVariables: any = { Title: methods.getValues().Title };
+    if (productData) {
+      checkTitleVariables["productID"] = productData.id;
+    }
+
+    // Check product Title
+    setLoadingMessage("Checking product title");
+    const Title = await checkProductTitle({
+      variables: checkTitleVariables,
+    });
+    if (Title?.errors) {
+      // If Title is taken, set an form error and return
+      console.log("Throw a form error");
+      Title?.errors &&
+        methods.setError("Title", {
+          message: `Title taken`,
+        });
+      setLoadingProductData(false);
+      return false;
+    }
+
+    if (productData) {
+      // The user is updating a store
+      setLoadingMessage("Updating product data");
+    } else {
+      // The user is creating a store
+      setLoadingMessage("Creating product");
+    }
+    // Submit the form to the backend
+    console.log("Submit form data to backend");
+    methods.handleSubmit(submit)(e);
+  };
+
+  // Render loading state
+  if (loadingProductData) {
+    return (
+      <BoxMUI sx={{ minHeight: "15rem" }} className="text-4xl p-5">
+        <Loader />
+        <Typo t="p" className="text-sm">
+          {loadingMessage}
+        </Typo>
+      </BoxMUI>
+    );
+  }
+
+  // Render form
   return (
     <Box>
       <FormProvider {...methods}>
         <form
-          onSubmit={methods.handleSubmit(onSubmit)}
+          onSubmit={formSubmit}
           className={classNames(
             className ? className : "",
             "flex flex-col p-5"
@@ -351,7 +649,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
           <SelectMultipleInput
             key={"Categories"}
             name={"Categories"}
-            options={categoryOptions.map((category) => {
+            options={categories.map((category) => {
               return {
                 value: category.id,
                 displayText: category.attributes.Title,
@@ -369,7 +667,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ className = "", slug }) => {
           <SelectMultipleInput
             key={"Tags"}
             name={"Tags"}
-            options={tagOptions.map((tag) => {
+            options={tags.map((tag) => {
               return {
                 value: tag.id,
                 displayText: tag.attributes.Title,

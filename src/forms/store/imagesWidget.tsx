@@ -60,12 +60,14 @@ type ImageDisplayProps = {
   src: any;
   alt?: string;
   onClick?: (data?: any) => void;
+  disabled?: boolean;
 };
 
 const ImageDisplay: React.FC<ImageDisplayProps> = ({
   src,
   alt = "",
   onClick = () => {},
+  disabled = false,
 }) => {
   return (
     <Box
@@ -79,30 +81,32 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
         padding: "10px",
       }}
     >
-      <Button
-        //   center
-        onClick={onClick}
-        sx={{
-          position: "absolute",
-          top: "0",
-          right: "0",
-          transform: "translate(30%, -50%)",
-          background: "#000",
-          color: "#fff",
-          borderRadius: "100%",
-          width: "40px !important",
-          height: "40px !important",
-          minWidth: "0",
-          // fontSize: 20,
-          "&:hover": {
-            background: "#ccc",
-          },
-        }}
-        variant="contained"
-        //   className="absolute rounded-full bg-primary block text-light right-0 top-0 w-6 h-6 transform translate-x-1/3 -translate-y-1/3"
-      >
-        {Icons.trashSolid}
-      </Button>
+      {disabled === false && (
+        <Button
+          //   center
+          onClick={onClick}
+          sx={{
+            position: "absolute",
+            top: "0",
+            right: "0",
+            transform: "translate(30%, -50%)",
+            background: "#000",
+            color: "#fff",
+            borderRadius: "100%",
+            width: "40px !important",
+            height: "40px !important",
+            minWidth: "0",
+            // fontSize: 20,
+            "&:hover": {
+              background: "#ccc",
+            },
+          }}
+          variant="contained"
+          //   className="absolute rounded-full bg-primary block text-light right-0 top-0 w-6 h-6 transform translate-x-1/3 -translate-y-1/3"
+        >
+          {Icons.trashSolid}
+        </Button>
+      )}
       <img
         style={{
           maxHeight: "94px",
@@ -125,12 +129,14 @@ type ImagesWidgetProps = {
   name: string;
   limit?: number;
   multiple?: boolean;
+  disabled?: boolean;
 };
 
 const ImagesWidget: React.FC<ImagesWidgetProps> = ({
   name,
   limit = 3,
   multiple = false,
+  disabled = false,
 }) => {
   const imageInputElementRef = useRef(null);
   const [previewImages, setPreviewImages] = useState<any[]>([]);
@@ -212,6 +218,7 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
               console.log("Image removed: ", j);
               remove(j);
             }}
+            disabled={disabled}
           />
         );
       }
@@ -219,7 +226,7 @@ const ImagesWidget: React.FC<ImagesWidgetProps> = ({
   });
 
   // Display AddImage component
-  if (previews.length < limit) {
+  if (previews.length < limit && disabled === false) {
     previews.push(
       <AddImage
         key={`image-widget-${name}-add-image`}

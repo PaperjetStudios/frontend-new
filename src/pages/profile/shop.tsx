@@ -1,11 +1,4 @@
-import BaseProfilePage from "../layout/base-profile-page";
-import Box from "../../components/box";
-import { Icons } from "../../components/icons";
-import OrderTable from "../../components/orders/table-element";
-import OrderList from "../../components/orders/table-list";
-import ShopSetup from "../../components/store/setup";
-import ProductSetup from "../../components/products/product-setup";
-import { Button, Tabs, Tab, Box as BoxMUI } from "@mui/material";
+import { useEffect, useState } from "react";
 import {
   MemoryRouter,
   Route,
@@ -17,7 +10,19 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { StaticRouter } from "react-router-dom/server";
-import { useEffect, useState } from "react";
+// Import Utility Functions And Variables
+import { checkRouteMatch } from "../../util/routes";
+// Import MaterialUI Components
+import { Button, Tabs, Tab, Box as BoxMUI } from "@mui/material";
+// Import Custom React Components
+import BaseProfilePage from "../layout/base-profile-page";
+import Box from "../../components/box";
+import { Icons } from "../../components/icons";
+import OrderTable from "../../components/orders/table-element";
+import OrderList from "../../components/orders/table-list";
+import ShopSetup from "../../components/store/setup";
+import ProductSetup from "../../components/products/product-setup";
+import Typo from "../../components/typo";
 
 const sections = [
   {
@@ -53,49 +58,33 @@ type ShopSections = {
   icon?: React.ReactElement;
 };
 
-// -----------------------------------------------------------
-const useRouteMatch = (patterns) => {
-  const { pathname } = useLocation();
-
-  let possibleMatches;
-  for (let i = 0; i < patterns.length; i++) {
-    const pattern = patterns[i];
-    // const possibleMatch = matchPath(pattern, pathname);
-    const possibleMatch = pathname.startsWith(pattern);
-    if (possibleMatch) {
-      if (i > 0) {
-        if (
-          possibleMatches &&
-          possibleMatches.pattern.length < pattern.length
-        ) {
-          possibleMatches = { id: i, routeMatch: possibleMatch, pattern };
-        }
-      } else {
-        possibleMatches = { id: i, routeMatch: possibleMatch, pattern };
-      }
-    }
-  }
-
-  if (possibleMatches) {
-    return possibleMatches;
-  }
-
-  return null;
-};
-
 type TablinksProps = {
   sections: ShopSections[];
 };
 
 const TabLinks: React.FC<TablinksProps> = ({ sections }) => {
-  const routeMatch = useRouteMatch(
+  const { pathname } = useLocation();
+  const routeMatch = checkRouteMatch(
     sections.map((section, ind) => {
       if (section.to) {
         return section.to;
       }
-    })
+    }),
+    pathname
   );
   const [activeTab, setActiveTab] = useState(`${routeMatch.id + 1}`);
+
+  useEffect(() => {
+    const routeMatch = checkRouteMatch(
+      sections.map((section, ind) => {
+        if (section.to) {
+          return section.to;
+        }
+      }),
+      pathname
+    );
+    setActiveTab(`${routeMatch.id + 1}`);
+  }, [pathname]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: any) => {
     setActiveTab(newValue);
@@ -134,30 +123,44 @@ type Props = {};
 const Shop: React.FC<Props> = ({ children }) => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const routeMatch = useRouteMatch(
+  const routeMatch = checkRouteMatch(
     sections.map((section, ind) => {
       if (section.to) {
         return section.to;
       }
-    })
+    }),
+    pathname
   );
 
+  let shopActions: any = [];
+  if (routeMatch && routeMatch.pattern.length < pathname.length) {
+    // if the current path is a sub-route of routeMatch, add an action
+    // that will allow the user to navigate back up one level
+
+    shopActions.push({
+      title: `Back to ${sections[routeMatch.id].title}`,
+      action: () => {
+        navigate(sections[routeMatch.id].to);
+      },
+    });
+  }
+  if (
+    routeMatch &&
+    routeMatch.pattern.length === pathname.length &&
+    sections[routeMatch.id].title === "Products"
+  ) {
+    // If the active tab is the "Product" tab add an action that
+    // will allow the user to create a product
+
+    shopActions.push({
+      title: `Create Product`,
+      action: () => {
+        navigate(`${sections[routeMatch.id].to}/create`);
+      },
+    });
+  }
   return (
-    <BaseProfilePage
-      title="Shop"
-      actions={
-        routeMatch && routeMatch.pattern.length < pathname.length // if the current path is a sub-route of routeMatch
-          ? [
-              {
-                title: `Back to ${sections[routeMatch.id].title}`,
-                action: () => {
-                  navigate(sections[routeMatch.id].to);
-                },
-              },
-            ]
-          : []
-      }
-    >
+    <BaseProfilePage title="Shop">
       <BoxMUI sx={{ width: "100%" }}>
         <TabLinks sections={sections} />
       </BoxMUI>

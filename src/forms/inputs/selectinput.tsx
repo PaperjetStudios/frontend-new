@@ -27,6 +27,7 @@ type Props = {
   option_className?: string;
   defaultValue?: string;
   error?: string;
+  disabled?: boolean;
 };
 
 /*
@@ -42,6 +43,7 @@ const SelectInput: React.FC<Props> = ({
   option_className = "",
   defaultValue = "",
   error = "",
+  disabled = false,
 }) => {
   const { control, watch } = useFormContext();
 
@@ -68,6 +70,7 @@ const SelectInput: React.FC<Props> = ({
               onChange={onChange}
               value={value}
               defaultValue={defaultValue}
+              disabled={disabled}
             >
               {options &&
                 options.map((option, ind) => {

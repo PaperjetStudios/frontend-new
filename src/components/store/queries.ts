@@ -84,7 +84,8 @@ export const CREATE_STORE = gql`
     $Zip_Code: String
     $Country: String
     $Social: [ComponentMenuSocialInput]
-    $slug: String
+    $Featured_Image: ID
+    $Gallery: [ID]
   ) {
     createStore(
       id: $seller
@@ -93,7 +94,6 @@ export const CREATE_STORE = gql`
         Description: $Description
         Seller: $seller
         Rating: $Rating
-        slug: $slug
         Contact_Details: {
           Email: $Email
           Address: {
@@ -106,6 +106,8 @@ export const CREATE_STORE = gql`
           }
           Social: $Social
         }
+        Featured_Image: $Featured_Image
+        Gallery: $Gallery
       }
     ) {
       data {
@@ -133,7 +135,6 @@ export const UPDATE_STORE = gql`
     $Zip_Code: String
     $Country: String
     $Social: [ComponentMenuSocialInput]
-    $slug: String
     $Featured_Image: ID
     $Gallery: [ID]
   ) {
@@ -144,7 +145,6 @@ export const UPDATE_STORE = gql`
         Description: $Description
         Seller: $userID
         Rating: $Rating
-        slug: $slug
         Contact_Details: {
           Email: $Email
           Address: {
@@ -174,6 +174,26 @@ export const UPDATE_STORE = gql`
 export const UPLOAD_MULTIPLE_FILES = gql`
   mutation ($files: [Upload]!, $field: String!, $forStore: Boolean) {
     multipleUpload(files: $files, field: $field, forStore: $forStore) {
+      data {
+        id
+      }
+    }
+  }
+`;
+
+export const CHECK_DUPLICATE_FILES = gql`
+  mutation (
+    $files: [Upload]!
+    $field: String!
+    $forStore: Boolean
+    $forProduct: Boolean
+  ) {
+    checkDuplicateFiles(
+      files: $files
+      field: $field
+      forStore: $forStore
+      forProduct: $forProduct
+    ) {
       data {
         id
       }

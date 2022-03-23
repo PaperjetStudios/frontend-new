@@ -29,6 +29,7 @@ import OrderList from "../components/orders/table-list";
 import ShopSetup from "../components/store/setup";
 import ProductSetup from "../components/products/product-setup";
 import Box from "../components/box";
+import ProductForm from "../forms/product/product";
 
 /* <Authorized guest redirect="/profile">
             <LoginRegisterPage />
@@ -52,10 +53,15 @@ const BaseRoutes: React.FC = () => {
         </Route>
         <Route path="shop" element={<Shop />}>
           <Route index element={<OrderList seller />} />
-          <Route path="setup" element={<ShopSetup />} />
-          <Route path="products" element={<ProductSetup />}>
+          <Route path="setup">
+            <Route index element={<ShopSetup disabled={true} />} />
+            <Route path="create" element={<ShopSetup mode={"create"} />} />
+            <Route path="edit" element={<ShopSetup mode={"edit"} />} />
+          </Route>
+          <Route path="products">
             <Route index element={<ProductSetup />} />
-            <Route path=":slug" element={<ProductSetup />} />
+            <Route path="create" element={<ProductSetup mode={"create"} />} />
+            <Route path=":slug" element={<ProductSetup mode={"edit"} />} />
           </Route>
           <Route path="banking_details" element={<Box />} />
         </Route>

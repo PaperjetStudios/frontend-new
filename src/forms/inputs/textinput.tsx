@@ -13,6 +13,7 @@ type TextInputProps = FormInputProps & {
   password?: boolean;
   type?: string;
   multiline?: boolean;
+  disabled?: boolean;
 };
 
 const PJSTextInput: React.FC<TextInputProps> = ({
@@ -23,6 +24,7 @@ const PJSTextInput: React.FC<TextInputProps> = ({
   password,
   type,
   multiline,
+  disabled = false,
 }) => {
   const { control } = useFormContext(); // retrieve all hook methods
 
@@ -53,6 +55,7 @@ const PJSTextInput: React.FC<TextInputProps> = ({
               value={value}
               placeholder={placeholder}
               {...extraParams}
+              disabled={disabled}
             />
           );
         }}
