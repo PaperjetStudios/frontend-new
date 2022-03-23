@@ -1,4 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { useContext, useLayoutEffect } from "react";
+
+import { Routes, Route, UNSAFE_NavigationContext } from "react-router-dom";
 import Authorized from "../components/auth/authorized";
 import Category from "../pages/template/category";
 
@@ -23,8 +25,6 @@ import Shop from "../pages/profile/shop";
 import Wallet from "../pages/profile/wallet";
 import ProfilePage from "../pages/profile/profile";
 import OrderHolder from "../pages/template/order-holder";
-import OrderHolderStore from "../pages/template/order-holder-store";
-import Order from "../pages/template/order";
 import OrderList from "../components/orders/table-list";
 import ShopSetup from "../components/store/setup";
 import ProductSetup from "../components/products/product-setup";
@@ -38,7 +38,26 @@ import ProductForm from "../forms/product/product";
         <Authorized redirect="/login-register">
         */
 
+import Order from "../pages/template/order";
+import { BrowserHistory } from "history";
+import { cartState } from "../state/cart";
+
 const BaseRoutes: React.FC = () => {
+  const navigation = useContext(UNSAFE_NavigationContext)
+    .navigator as BrowserHistory;
+
+  useLayoutEffect(() => {
+    if (navigation) {
+      navigation.listen((locationListener) => {
+        // hide the cart preview every dom change
+        cartState.set((prevState) => ({
+          ...prevState,
+          showing: false,
+        }));
+      });
+    }
+  }, [navigation]);
+
   return (
     <Routes>
       <Route path="/" element={<Homepage />} />
