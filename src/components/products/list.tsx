@@ -17,6 +17,7 @@ import PJSPagination from "../pagination";
 import Box from "../box";
 import NoStoreFound from "../../forms/store/no-store-found";
 import NoProductsFound from "../../forms/product/no-products-found";
+import Typo from "../typo";
 
 type Props = {
   pageSize: number;
@@ -99,8 +100,19 @@ const ProductCardList: React.FC<Props> = ({
     },
   });
 
-  if (loading || data === undefined) {
+  if ((loading || data === undefined) && seller === false) {
     return <Loader />;
+  }
+
+  if ((loading || data === undefined) && seller === true) {
+    return (
+      <BoxMUI sx={{ minHeight: "15rem" }} className="text-4xl p-5">
+        <Loader size="large" />
+        <Typo t="p" className="text-sm">
+          {"Loading products"}
+        </Typo>
+      </BoxMUI>
+    );
   }
 
   if (seller === true && storeData === undefined) {
