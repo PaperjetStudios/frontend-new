@@ -3,7 +3,6 @@ import { gql } from "@apollo/client";
 export const BASE_ORDER = gql`
   fragment BASE_ORDER on Order {
     Unique
-    Payment
     Items
     Status
     Total_Items
@@ -52,10 +51,14 @@ export const paginated_orders = (userId, type = "seller") => {
   query (
     $page: Int
     $pageSize: Int
+    $status: String
   ) {
     orders(
       pagination: { page: $page, pageSize: $pageSize }
       filters: {
+        Status: {
+          eq: $status
+        }
        ${filters}
       }
     ) {

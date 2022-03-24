@@ -24,7 +24,7 @@ import Shop from "../pages/profile/shop";
 import Wallet from "../pages/profile/wallet";
 import ProfilePage from "../pages/profile/profile";
 import OrderHolder from "../pages/template/order-holder";
-import OrderList from "../components/orders/table-list";
+import StoreOrderList from "../components/orders/table-list-store";
 import ShopSetup from "../components/store/setup";
 import ProductSetup from "../components/products/product-setup";
 import Box from "../components/box";
@@ -63,7 +63,7 @@ const BaseRoutes: React.FC = () => {
           <Route path=":order" element={<Order />} />
         </Route>
         <Route path="shop" element={<Shop />}>
-          <Route index element={<OrderList seller />} />
+          <Route index element={<StoreOrderList seller />} />
           <Route path="setup">
             <Route index element={<ShopSetup disabled={true} />} />
             <Route path="create" element={<ShopSetup mode={"create"} />} />

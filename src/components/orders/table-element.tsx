@@ -11,6 +11,7 @@ import { makeDate } from "../../config/util";
 import OrderTableRow from "./table-row";
 
 import Box from "../box";
+import NoOrdersFound from "./no-orders-found";
 
 type Props = {
   data: {
@@ -22,7 +23,11 @@ type Props = {
 
 const OrderTable: React.FC<Props> = ({ data, seller = false }) => {
   return (
-    <TableContainer component={Box} sx={{ marginBottom: "20px" }}>
+    <TableContainer
+      component={Box}
+      sx={{ marginBottom: "20px" }}
+      className="border-t border-grey"
+    >
       <Table aria-label="table">
         <TableHead>
           <TableRow>
@@ -59,6 +64,11 @@ const OrderTable: React.FC<Props> = ({ data, seller = false }) => {
           ))}
         </TableBody>
       </Table>
+      {data.length == 0 && (
+        <Box className="p-5">
+          <NoOrdersFound />
+        </Box>
+      )}
     </TableContainer>
   );
 };
