@@ -4,6 +4,7 @@ import { Icons } from "../../components/icons";
 import OrderTable from "../../components/orders/table-element";
 import OrderList from "../../components/orders/table-list";
 import ShopSetup from "../../components/store/setup";
+import ProductSetup from "../../components/products/product-setup";
 
 type Props = {};
 
@@ -20,6 +21,11 @@ const Shop: React.FC<Props> = ({ children }) => {
         {
           title: "Setup",
           content: <ShopSetup />,
+          icon: Icons.store,
+        },
+        {
+          title: "Products",
+          content: <ProductSetup />,
           icon: Icons.store,
         },
         {
